@@ -12,10 +12,35 @@ import routes from "./routes/index.js";
 
 const app = express();
 
+// CORS configuration for mobile app
+const corsOptions = {
+  origin: '*', // Allow all origins for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
 // Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+
+// Request logging middleware with more details
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log('Headers:', JSON.stringify(req.headers));
+  console.log('Query:', JSON.stringify(req.query));
+
+  // Log response
+  const oldSend = res.send;
+  res.send = function(data) {
+    console.log(`${new Date().toISOString()} - Response Status: ${res.statusCode}`);
+    console.log('Response Data:', typeof data === 'string' ? data.substring(0, 200) : JSON.stringify(data).substring(0, 200));
+    oldSend.apply(res, arguments);
+  };
+
+  next();
+});
 
 // Routes
 app.use("/api", routes);

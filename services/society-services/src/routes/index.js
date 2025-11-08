@@ -12,9 +12,11 @@ import parkingRoutes from './parkingRoutes.js';
 import eventsRoutes from './eventsRoutes.js';
 import visitorsRoutes from './visitorsRoutes.js';
 import maintenanceRoutes from './maintenanceRoutes.js';
+import residentRoutes from './residentRoutes.js';
 
 const router = express.Router();
 
+// Admin Routes
 router.use('/auth', authRoutes);
 router.use('/buildings', buildingRoutes);
 router.use('/building-settings', buildingSettingsRoutes);
@@ -28,5 +30,8 @@ router.use('/parking', parkingRoutes);
 router.use('/events', eventsRoutes);
 router.use('/visitors', visitorsRoutes);
 router.use('/maintenance', maintenanceRoutes);
+
+// Resident Routes (Mobile App)
+router.use('/resident', residentRoutes);
 
 export default router;
