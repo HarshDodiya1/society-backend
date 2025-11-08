@@ -1,7 +1,7 @@
 import { successResponse, errorResponse } from '../utils/response.js';
 import { generateToken } from '../utils/tokenHelper.js';
 import { SUPER_ADMIN, USER_TYPES } from '../utils/constants.js';
-import BuildingAdminModel from '../models/BuildingAdmins.js';
+import BuildingAdminModel from '../models/buildingadmins.js';
 import BuildingsModel from '../models/Buildings.js';
 
 // Temporary OTP storage (in production, use Redis)

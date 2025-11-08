@@ -1,6 +1,6 @@
 import { successResponse, errorResponse } from '../utils/response.js';
 import BuildingsModel from '../models/Buildings.js';
-import BuildingAdminModel from '../models/BuildingAdmins.js'
+import BuildingAdminModel from '../models/buildingadmins.js'
 
 /**
  * Create Building (Society)

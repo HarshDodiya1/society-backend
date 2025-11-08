@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const FloorsSchema = new Schema({
     floorName: {
@@ -54,6 +54,6 @@ FloorsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const FloorsModel = DBConnect.model('floors', FloorsSchema)
+const FloorsModel = DBConnect.model('floors', FloorsSchema);
 
-module.exports = FloorsModel
+export default FloorsModel;

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const UnitsSchema = new Schema({
     unitNumber: {
@@ -24,6 +24,11 @@ const UnitsSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'blocks',
         required: true
+    },
+    unitStatus: {
+        type: String,
+        enum: ['Vacant', 'Occupied', 'Under Maintenance'],
+        default: 'Vacant'
     },
     status: {
         type: String,
@@ -59,6 +64,6 @@ UnitsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const UnitsModel = DBConnect.model('units', UnitsSchema)
+const UnitsModel = DBConnect.model('units', UnitsSchema);
 
-module.exports = UnitsModel
+export default UnitsModel;

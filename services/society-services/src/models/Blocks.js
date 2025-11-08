@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const BlocksSchema = new Schema({
     blockName: {
@@ -46,6 +46,6 @@ BlocksSchema.methods.toJSON = function () {
     return obj;
 };
 
-const BlocksModel = DBConnect.model('blocks', BlocksSchema)
+const BlocksModel = DBConnect.model('blocks', BlocksSchema);
 
-module.exports = BlocksModel
+export default BlocksModel;
