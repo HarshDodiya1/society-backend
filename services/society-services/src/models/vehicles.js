@@ -3,6 +3,11 @@ const Schema = mongoose.Schema
 const { DBConnect } = require('../models/index.js')
 
 const VehiclesSchema = new Schema({
+    memberId: {
+        type: Schema.Types.ObjectId,
+        ref: 'members',
+        required: true
+    },
     vehicleImage: {
         type: String
     },
