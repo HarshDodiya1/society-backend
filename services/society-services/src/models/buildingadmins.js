@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const BuildingAdminSchema = new Schema({
     firstName: {
@@ -13,8 +13,12 @@ const BuildingAdminSchema = new Schema({
     },
     email: {
         type: String,
+        required: true
+    },
+    countryCode: {
+        type: String,
         required: true,
-        unique: true
+        default: '+91'
     },
     phoneNumber: {
         type: String,
@@ -58,11 +62,11 @@ const BuildingAdminSchema = new Schema({
     }
 });
 
-SocietyAdminSchema.methods.toJSON = function () {
+BuildingAdminSchema.methods.toJSON = function () {
     var obj = this.toObject();
     return obj;
 };
 
-const BuildingAdminModel = DBConnect.model('buildingadmins', BuildingAdminSchema)
+const BuildingAdminModel = DBConnect.model('buildingadmins', BuildingAdminSchema);
 
-module.exports = BuildingAdminModel
+export default BuildingAdminModel;

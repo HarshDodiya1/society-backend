@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const BuildingsSchema = new Schema({
     buildingName: {
@@ -14,6 +14,9 @@ const BuildingsSchema = new Schema({
     address: {
         type: String,
         required: true
+    },
+    territory: {
+        type: String
     },
     city: {
         type: String,
@@ -29,15 +32,21 @@ const BuildingsSchema = new Schema({
     },
     totalBlocks: {
         type: Number,
-        required: true
+        default: 0
     },
     totalUnits: {
         type: Number,
-        required: true
+        default: 0
     },
     buildingType: {
-        type: String,
-        required: true
+        type: String
+    },
+    buildingLogo: {
+        type: String
+    },
+    projectId: {
+        type: Schema.Types.ObjectId,
+        ref: 'projects'
     },
     approveBy: {
         type: Schema.Types.ObjectId,
@@ -48,6 +57,7 @@ const BuildingsSchema = new Schema({
     },
     status: {
         type: String,
+        enum: ['active', 'inactive', 'pending'],
         default: 'active'
     },
     createdBy: {
@@ -80,6 +90,6 @@ BuildingsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const BuildingsModel = DBConnect.model('buildings', BuildingsSchema)
+const BuildingsModel = DBConnect.model('buildings', BuildingsSchema);
 
-module.exports = BuildingsModel
+export default BuildingsModel;
