@@ -32,9 +32,6 @@ export const superAdminSendOTP = async (req, res) => {
             createdAt: Date.now()
         });
 
-        // In production, send OTP via SMS service
-        console.log(`OTP for Super Admin ${phoneNumber}: ${otp}`);
-
         return successResponse(res, null, 'OTP sent successfully');
     } catch (error) {
         console.error('Super Admin Send OTP Error:', error);
@@ -138,9 +135,6 @@ export const buildingAdminSendOTP = async (req, res) => {
             createdAt: Date.now(),
             buildingAdminId: buildingAdmin._id
         });
-
-        // In production, send OTP via SMS service
-        console.log(`OTP for Building Admin ${phoneNumber}: ${otp}`);
 
         return successResponse(res, null, 'OTP sent successfully');
     } catch (error) {

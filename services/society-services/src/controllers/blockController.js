@@ -8,7 +8,6 @@ import BuildingsModel from '../models/Buildings.js';
 export const createBlock = async (req, res) => {
     try {
         const { blockName } = req.body;
-        console.log("User details ", req.user);
         const buildingId = req.user.buildingId;
 
         // Validation
