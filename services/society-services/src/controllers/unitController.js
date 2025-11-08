@@ -21,21 +21,28 @@ export const createUnit = async (req, res) => {
         const floor = await FloorsModel.findOne({
             _id: floorId,
             isDeleted: false
-        }).populate({
-            path: 'blockId',
-            populate: { path: 'buildingId' }
         });
 
         if (!floor) {
             return errorResponse(res, 'Floor not found', 404);
         }
 
-        if (floor.blockId.buildingId._id.toString() !== userBuildingId.toString()) {
+        // Check if block exists
+        const block = await BlocksModel.findOne({
+            _id: blockId,
+            isDeleted: false
+        });
+
+        if (!block) {
+            return errorResponse(res, 'Block not found', 404);
+        }
+
+        if (block.buildingId.toString() !== userBuildingId.toString()) {
             return errorResponse(res, 'Access denied. You can only create units in your building.', 403);
         }
 
         // Check if blockId matches floor's blockId
-        if (floor.blockId._id.toString() !== blockId) {
+        if (floor.blockId.toString() !== blockId) {
             return errorResponse(res, 'Block ID does not match the floor\'s block', 400);
         }
 
@@ -59,7 +66,6 @@ export const createUnit = async (req, res) => {
             blockId,
             unitStatus,
             status: 'active',
-            createdBy: req.user.id,
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -95,24 +101,27 @@ export const getUnitsByFloor = async (req, res) => {
         const { floorId } = req.params;
         const userBuildingId = req.user.buildingId;
 
-        // Check if floor exists and belongs to user's building
+        // Check if floor exists
         const floor = await FloorsModel.findOne({
             _id: floorId,
             isDeleted: false
-        }).populate({
-            path: 'blockId',
-            populate: { path: 'buildingId' }
         });
 
         if (!floor) {
             return errorResponse(res, 'Floor not found', 404);
         }
 
-        if (floor.blockId.buildingId._id.toString() !== userBuildingId.toString()) {
+        // Check if block belongs to user's building
+        const block = await BlocksModel.findOne({
+            _id: floor.blockId,
+            isDeleted: false
+        });
+
+        if (!block || block.buildingId.toString() !== userBuildingId.toString()) {
             return errorResponse(res, 'Access denied. You can only view units in your building.', 403);
         }
 
-        const { page = 1, limit = 10, search = '', unitStatus } = req.query;
+        const { page = 1, limit = 100, search = '', unitStatus } = req.query;
 
         const query = { floorId, isDeleted: false };
 
@@ -130,7 +139,70 @@ export const getUnitsByFloor = async (req, res) => {
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const units = await UnitsModel.find(query)
-            .sort({ createdAt: -1 })
+            .sort({ unitNumber: 1 })
+            .skip(skip)
+            .limit(parseInt(limit))
+            .lean();
+
+        const total = await UnitsModel.countDocuments(query);
+
+        return successResponse(res, {
+            units,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        }, 'Units fetched successfully');
+    } catch (error) {
+        console.error('Get Units Error:', error);
+        return errorResponse(res, error.message, 500);
+    }
+};
+
+/**
+ * Get All Units for a Block
+ */
+export const getUnitsByBlock = async (req, res) => {
+    try {
+        const { blockId } = req.params;
+        const userBuildingId = req.user.buildingId;
+
+        // Check if block exists and belongs to user's building
+        const block = await BlocksModel.findOne({
+            _id: blockId,
+            isDeleted: false
+        });
+
+        if (!block) {
+            return errorResponse(res, 'Block not found', 404);
+        }
+
+        if (block.buildingId.toString() !== userBuildingId.toString()) {
+            return errorResponse(res, 'Access denied. You can only view units in your building.', 403);
+        }
+
+        const { page = 1, limit = 100, search = '', unitStatus } = req.query;
+
+        const query = { blockId, isDeleted: false };
+
+        if (search) {
+            query.$or = [
+                { unitNumber: { $regex: search, $options: 'i' } },
+                { unitType: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        if (unitStatus) {
+            query.unitStatus = unitStatus;
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const units = await UnitsModel.find(query)
+            .populate('floorId', 'floorName')
+            .sort({ floorId: 1, unitNumber: 1 })
             .skip(skip)
             .limit(parseInt(limit))
             .lean();
@@ -170,12 +242,6 @@ export const updateUnitStatus = async (req, res) => {
         const unit = await UnitsModel.findOne({
             _id: id,
             isDeleted: false
-        }).populate({
-            path: 'floorId',
-            populate: {
-                path: 'blockId',
-                populate: { path: 'buildingId' }
-            }
         });
 
         if (!unit) {
@@ -183,14 +249,18 @@ export const updateUnitStatus = async (req, res) => {
         }
 
         // Check if unit belongs to user's building
-        if (unit.floorId.blockId.buildingId._id.toString() !== userBuildingId.toString()) {
+        const block = await BlocksModel.findOne({
+            _id: unit.blockId,
+            isDeleted: false
+        });
+
+        if (!block || block.buildingId.toString() !== userBuildingId.toString()) {
             return errorResponse(res, 'Access denied. You can only update units in your building.', 403);
         }
 
         // Update unit status
         const updatedUnit = await UnitsModel.findByIdAndUpdate(id, {
             unitStatus,
-            updatedBy: req.user.id,
             updatedAt: new Date()
         }, { new: true });
 

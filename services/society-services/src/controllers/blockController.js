@@ -7,8 +7,9 @@ import BuildingsModel from '../models/Buildings.js';
  */
 export const createBlock = async (req, res) => {
     try {
-        const { blockName, buildingId } = req.body;
-        const userBuildingId = req.user.buildingId;
+        const { blockName } = req.body;
+        console.log("User details ", req.user);
+        const buildingId = req.user.buildingId;
 
         // Validation
         if (!blockName) {
@@ -17,11 +18,6 @@ export const createBlock = async (req, res) => {
 
         if (!buildingId) {
             return errorResponse(res, 'Building ID is required', 400);
-        }
-
-        // Check if the user is authorized for this building
-        if (buildingId !== userBuildingId.toString()) {
-            return errorResponse(res, 'Access denied. You can only create blocks for your building.', 403);
         }
 
         // Check if building exists
@@ -45,12 +41,11 @@ export const createBlock = async (req, res) => {
             return errorResponse(res, 'Block with this name already exists in the building', 400);
         }
 
-        // Create block
+        // Create block (don't set createdBy - optional field)
         const block = await BlocksModel.create({
             blockName,
             buildingId,
             status: 'active',
-            createdBy: req.user.id,
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -88,7 +83,7 @@ export const getBlocksBySociety = async (req, res) => {
             return errorResponse(res, 'Access denied. You can only view blocks for your building.', 403);
         }
 
-        const { page = 1, limit = 10, search = '', status } = req.query;
+        const { page = 1, limit = 100, search = '', status } = req.query;
 
         const query = { buildingId: societyId, isDeleted: false };
 
@@ -165,7 +160,6 @@ export const updateBlock = async (req, res) => {
 
         // Update block
         const updateData = {
-            updatedBy: req.user.id,
             updatedAt: new Date()
         };
 
@@ -215,7 +209,6 @@ export const deleteBlock = async (req, res) => {
         await BlocksModel.findByIdAndUpdate(id, {
             isDeleted: true,
             deletedAt: new Date(),
-            updatedBy: req.user.id,
             updatedAt: new Date()
         });
 

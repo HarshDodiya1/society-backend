@@ -7,14 +7,6 @@ const FloorsSchema = new Schema({
         type: String,
         required: true
     },
-    unitType: {
-        type: String,
-        required: true
-    },
-    unitsPerFloor: {
-        type: Number,
-        required: true
-    },
     blockId: {
         type: Schema.Types.ObjectId,
         ref: 'blocks',

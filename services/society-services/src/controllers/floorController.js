@@ -8,12 +8,12 @@ import BuildingsModel from '../models/Buildings.js';
  */
 export const createFloors = async (req, res) => {
     try {
-        const { blockId, floorNamePrefix, startFloorNumber, endFloorNumber, unitType, unitsPerFloor } = req.body;
+        const { blockId, floorNamePrefix, startFloorNumber, endFloorNumber } = req.body;
         const userBuildingId = req.user.buildingId;
 
         // Validation
-        if (!blockId || !floorNamePrefix || !startFloorNumber || !endFloorNumber || !unitType || !unitsPerFloor) {
-            return errorResponse(res, 'All fields are required: blockId, floorNamePrefix, startFloorNumber, endFloorNumber, unitType, unitsPerFloor', 400);
+        if (!blockId || !floorNamePrefix || startFloorNumber === undefined || endFloorNumber === undefined) {
+            return errorResponse(res, 'All fields are required: blockId, floorNamePrefix, startFloorNumber, endFloorNumber', 400);
         }
 
         if (startFloorNumber > endFloorNumber) {
@@ -24,13 +24,13 @@ export const createFloors = async (req, res) => {
         const block = await BlocksModel.findOne({
             _id: blockId,
             isDeleted: false
-        }).populate('buildingId');
+        });
 
         if (!block) {
             return errorResponse(res, 'Block not found', 404);
         }
 
-        if (block.buildingId._id.toString() !== userBuildingId.toString()) {
+        if (block.buildingId.toString() !== userBuildingId.toString()) {
             return errorResponse(res, 'Access denied. You can only create floors for blocks in your building.', 403);
         }
 
@@ -44,17 +44,14 @@ export const createFloors = async (req, res) => {
 
         const floorsToCreate = [];
         for (let i = startFloorNumber; i <= endFloorNumber; i++) {
-            const floorName = `${floorNamePrefix} ${i}`;
+            const floorName = `${floorNamePrefix}${i}`;
             if (existingNames.includes(floorName)) {
                 return errorResponse(res, `Floor "${floorName}" already exists in this block`, 400);
             }
             floorsToCreate.push({
                 floorName,
-                unitType,
-                unitsPerFloor,
                 blockId,
                 status: 'active',
-                createdBy: req.user.id,
                 createdAt: new Date(),
                 updatedAt: new Date()
             });
@@ -67,8 +64,6 @@ export const createFloors = async (req, res) => {
             floors: createdFloors.map(floor => ({
                 id: floor._id,
                 floorName: floor.floorName,
-                unitType: floor.unitType,
-                unitsPerFloor: floor.unitsPerFloor,
                 blockId: floor.blockId
             }))
         }, `${createdFloors.length} floors created successfully`, 201);
@@ -90,17 +85,17 @@ export const getFloorsByBlock = async (req, res) => {
         const block = await BlocksModel.findOne({
             _id: blockId,
             isDeleted: false
-        }).populate('buildingId');
+        });
 
         if (!block) {
             return errorResponse(res, 'Block not found', 404);
         }
 
-        if (block.buildingId._id.toString() !== userBuildingId.toString()) {
+        if (block.buildingId.toString() !== userBuildingId.toString()) {
             return errorResponse(res, 'Access denied. You can only view floors for blocks in your building.', 403);
         }
 
-        const { page = 1, limit = 10, search = '', status } = req.query;
+        const { page = 1, limit = 100, search = '', status } = req.query;
 
         const query = { blockId, isDeleted: false };
 
@@ -115,7 +110,7 @@ export const getFloorsByBlock = async (req, res) => {
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const floors = await FloorsModel.find(query)
-            .sort({ createdAt: -1 })
+            .sort({ floorName: 1 })
             .skip(skip)
             .limit(parseInt(limit))
             .lean();

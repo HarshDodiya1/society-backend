@@ -74,7 +74,7 @@ export const createBuilding = async (req, res) => {
         });
 
         // Generate building admin login link
-        const loginLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/${building._id}/login`;
+        const loginLink = `${process.env.FRONTEND_URL || 'http://localhost:8080'}/${building._id}/login`;
 
         const responseData = {
             building: {
