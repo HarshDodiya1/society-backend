@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import { DBConnect } from './index.js';
 
 const PenaltiesSchema = new Schema({
     penaltyNumber: {
@@ -82,4 +82,4 @@ PenaltiesSchema.methods.toJSON = function () {
 
 const PenaltiesModel = DBConnect.model('penalties', PenaltiesSchema)
 
-module.exports = PenaltiesModel
+export default PenaltiesModel

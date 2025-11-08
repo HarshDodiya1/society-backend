@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import { DBConnect } from './index.js';
 
 const AmenityBookingsSchema = new Schema({
     amenityId: {
@@ -78,4 +78,4 @@ AmenityBookingsSchema.methods.toJSON = function () {
 
 const AmenityBookingsModel = DBConnect.model('amenitybookings', AmenityBookingsSchema)
 
-module.exports = AmenityBookingsModel
+export default AmenityBookingsModel

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const AmenitiesSchema = new Schema({
     name: {
@@ -11,31 +11,36 @@ const AmenitiesSchema = new Schema({
         type: String,
         required: true
     },
+    images: [{
+        type: String
+    }],
     capacity: {
         type: Number,
         required: true
     },
     amenityType: {
         type: String,
+        enum: ['free', 'paid'],
         required: true
     },
     bookingCharge: {
-        type: String,
-        required: true
-    },
-    image: {
-        type: String
+        type: Number,
+        default: 0
     },
     bookingType: {
         type: String,
+        enum: ['one-time', 'recurring'],
         required: true
     },
-    bookingSlots: [{
-        type: String
-    }],
+    paymentGateway: {
+        type: String,
+        enum: ['phonepe', 'razorpay', 'paytm', 'none'],
+        default: 'none'
+    },
     advanceBookingDays: {
         type: Number,
-        required: true
+        required: true,
+        default: 7
     },
     requiresApproval: {
         type: Boolean,
@@ -45,6 +50,11 @@ const AmenitiesSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'buildings',
         required: true
+    },
+    amenityStatus: {
+        type: String,
+        enum: ['available', 'maintenance', 'unavailable'],
+        default: 'available'
     },
     status: {
         type: String,
@@ -80,6 +90,6 @@ AmenitiesSchema.methods.toJSON = function () {
     return obj;
 };
 
-const AmenitiesModel = DBConnect.model('amenities', AmenitiesSchema)
+const AmenitiesModel = DBConnect.model('amenities', AmenitiesSchema);
 
-module.exports = AmenitiesModel
+export default AmenitiesModel;

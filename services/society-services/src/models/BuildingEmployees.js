@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const BuildingEmployeesSchema = new Schema({
     firstName: {
@@ -27,22 +27,68 @@ const BuildingEmployeesSchema = new Schema({
         type: String,
         required: true
     },
+    gender: {
+        type: String,
+        enum: ['male', 'female', 'other']
+    },
+    address: {
+        street: String,
+        city: String,
+        state: String,
+        pincode: String
+    },
+    dateOfBirth: {
+        type: Date
+    },
     employeeType: {
         type: String,
         required: true
     },
-    idProof: {
+    employmentType: {
         type: String,
-        required: true
+        enum: ['society', 'agency'],
+        required: true,
+        default: 'society'
     },
-    policeVerificationProof: {
+    // Agency details - only if employmentType is 'agency'
+    agencyDetails: {
+        agencyName: String,
+        agencyManagerName: String,
+        agencyManagerContact: String,
+        contractStartDate: Date,
+        contractEndDate: Date,
+        agencyAddress: String
+    },
+    // ID Proofs
+    idProofType: {
         type: String,
-        required: true
+        enum: ['aadhar', 'pan', 'driving_license', 'voter_id']
+    },
+    idProofNumber: {
+        type: String
+    },
+    idProofDocument: {
+        type: String
+    },
+    policeVerificationDocument: {
+        type: String
+    },
+    // Work Schedule
+    shiftTimings: {
+        startTime: String,
+        endTime: String
+    },
+    workingDays: [{
+        type: String,
+        enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }],
+    joiningDate: {
+        type: Date,
+        default: Date.now
     },
     userId: {
         type: Schema.Types.ObjectId,
-        ref: 'users',
-        required: true
+        ref: 'users'
     },
     buildingId: {
         type: Schema.Types.ObjectId,
@@ -51,6 +97,7 @@ const BuildingEmployeesSchema = new Schema({
     },
     status: {
         type: String,
+        enum: ['active', 'inactive'],
         default: 'active'
     },
     createdBy: {
@@ -83,6 +130,6 @@ BuildingEmployeesSchema.methods.toJSON = function () {
     return obj;
 };
 
-const BuildingEmployeesModel = DBConnect.model('buildingemployees', BuildingEmployeesSchema)
+const BuildingEmployeesModel = DBConnect.model('buildingemployees', BuildingEmployeesSchema);
 
-module.exports = BuildingEmployeesModel
+export default BuildingEmployeesModel;

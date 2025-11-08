@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const ParkingAreasSchema = new Schema({
     parkingName: {
@@ -62,6 +62,6 @@ ParkingAreasSchema.methods.toJSON = function () {
     return obj;
 };
 
-const ParkingAreasModel = DBConnect.model('parkingareas', ParkingAreasSchema)
+const ParkingAreasModel = DBConnect.model('parkingareas', ParkingAreasSchema);
 
-module.exports = ParkingAreasModel
+export default ParkingAreasModel;

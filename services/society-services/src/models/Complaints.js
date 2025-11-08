@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const ComplaintsSchema = new Schema({
     title: {
@@ -13,14 +13,20 @@ const ComplaintsSchema = new Schema({
     },
     priority: {
         type: String,
+        enum: ['high', 'medium', 'low'],
         required: true
     },
-    descriptions: {
+    description: {
         type: String,
         required: true
     },
-    photosName: {
+    images: [{
         type: String
+    }],
+    complaintType: {
+        type: String,
+        enum: ['common', 'unit'],
+        required: true
     },
     buildingId: {
         type: Schema.Types.ObjectId,
@@ -29,21 +35,37 @@ const ComplaintsSchema = new Schema({
     },
     unitId: {
         type: Schema.Types.ObjectId,
-        ref: 'units',
-        required: true
+        ref: 'units'
     },
     memberId: {
         type: Schema.Types.ObjectId,
         ref: 'members',
         required: true
     },
-    buildingEmployeeId: {
+    assignedToEmployeeId: {
         type: Schema.Types.ObjectId,
         ref: 'buildingemployees'
     },
     complaintStatus: {
         type: String,
+        enum: ['open', 'in-process', 'on-hold', 'close', 're-open', 'dismiss'],
         default: 'open'
+    },
+    followUps: [{
+        remarks: String,
+        nextFollowUpDate: Date,
+        sendEmailNotification: Boolean,
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    resolvedDate: {
+        type: Date
     },
     status: {
         type: String,
@@ -79,6 +101,6 @@ ComplaintsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const ComplaintsModel = DBConnect.model('complaints', ComplaintsSchema)
+const ComplaintsModel = DBConnect.model('complaints', ComplaintsSchema);
 
-module.exports = ComplaintsModel
+export default ComplaintsModel;

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 import { DBConnect } from './index.js';
 
-const NoticesSchema = new Schema({
+const EventsSchema = new Schema({
     title: {
         type: String,
         required: true
@@ -11,18 +11,8 @@ const NoticesSchema = new Schema({
         type: String,
         required: true
     },
-    attachments: [{
+    banner: {
         type: String
-    }],
-    category: {
-        type: String,
-        enum: ['general', 'maintenance', 'event', 'emergency', 'meeting', 'sos'],
-        required: true
-    },
-    priority: {
-        type: String,
-        enum: ['high', 'medium', 'low'],
-        required: true
     },
     buildingId: {
         type: Schema.Types.ObjectId,
@@ -33,29 +23,59 @@ const NoticesSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'blocks'
     }],
-    targetUserType: {
-        type: String,
-        enum: ['owner', 'tenant', 'all'],
-        default: 'all'
-    },
+    floorIds: [{
+        type: Schema.Types.ObjectId,
+        ref: 'floors'
+    }],
     unitIds: [{
         type: Schema.Types.ObjectId,
         ref: 'units'
     }],
-    publishDate: {
+    targetUserTypes: [{
+        type: String,
+        enum: ['owner', 'tenant', 'employee']
+    }],
+    territory: {
+        type: String
+    },
+    venue: {
+        type: String,
+        required: true
+    },
+    venueLocation: {
+        lat: Number,
+        lng: Number,
+        address: String
+    },
+    eventDate: {
         type: Date,
         required: true
     },
-    publishNow: {
-        type: Boolean,
-        default: false
-    },
-    expiryDate: {
-        type: Date
-    },
-    noticeStatus: {
+    startTime: {
         type: String,
-        enum: ['draft', 'published', 'expired'],
+        required: true
+    },
+    endTime: {
+        type: String,
+        required: true
+    },
+    registrationLimit: {
+        type: Number,
+        required: true
+    },
+    registrationFields: [{
+        fieldName: String,
+        fieldType: String, // text, email, phone, select, checkbox
+        isRequired: Boolean,
+        options: [String] // for select/checkbox
+    }],
+    registrations: [{
+        type: Schema.Types.ObjectId,
+        ref: 'eventregistrations'
+    }],
+    eventStatus: {
+        type: String,
+        enum: ['draft', 'published', 'ongoing', 'completed', 'cancelled'],
         default: 'draft'
     },
     status: {
@@ -87,11 +107,11 @@ const NoticesSchema = new Schema({
     }
 });
 
-NoticesSchema.methods.toJSON = function () {
+EventsSchema.methods.toJSON = function () {
     var obj = this.toObject();
     return obj;
 };
 
-const NoticesModel = DBConnect.model('notices', NoticesSchema);
+const EventsModel = DBConnect.model('events', EventsSchema);
 
-export default NoticesModel;
+export default EventsModel;

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import { DBConnect } from './index.js';
 
 const MaintenanceBillsSchema = new Schema({
     maintenanceTypeId: {
@@ -91,4 +91,4 @@ MaintenanceBillsSchema.methods.toJSON = function () {
 
 const MaintenanceBillsModel = DBConnect.model('maintenancebills', MaintenanceBillsSchema)
 
-module.exports = MaintenanceBillsModel
+export default MaintenanceBillsModel

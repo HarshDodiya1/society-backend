@@ -1,17 +1,13 @@
 import mongoose from 'mongoose';
-const Schema = mongoose.Schema
+const Schema = mongoose.Schema;
 import { DBConnect } from './index.js';
 
-const UsersSchema = new Schema({
+const CommitteeMembersSchema = new Schema({
     firstName: {
         type: String,
         required: true
     },
     lastName: {
-        type: String,
-        required: true
-    },
-    userName: {
         type: String,
         required: true
     },
@@ -31,16 +27,30 @@ const UsersSchema = new Schema({
         type: String,
         required: true
     },
-    isbuildingMember: {
-        type: Boolean,
-        default: false
+    committeeType: {
+        type: String,
+        enum: ['Chairman', 'Secretary', 'Treasurer', 'Member'],
+        required: true
     },
-    isbuildingEmployee: {
-        type: Boolean,
-        default: false
+    memberId: {
+        type: Schema.Types.ObjectId,
+        ref: 'members'
+    },
+    buildingId: {
+        type: Schema.Types.ObjectId,
+        ref: 'buildings',
+        required: true
+    },
+    startDate: {
+        type: Date,
+        required: true
+    },
+    endDate: {
+        type: Date
     },
     status: {
         type: String,
+        enum: ['active', 'inactive'],
         default: 'active'
     },
     createdBy: {
@@ -68,11 +78,11 @@ const UsersSchema = new Schema({
     }
 });
 
-UsersSchema.methods.toJSON = function () {
+CommitteeMembersSchema.methods.toJSON = function () {
     var obj = this.toObject();
     return obj;
 };
 
-const UsersModel = DBConnect.model('users', UsersSchema)
+const CommitteeMembersModel = DBConnect.model('committeemembers', CommitteeMembersSchema);
 
-export default UsersModel
+export default CommitteeMembersModel;

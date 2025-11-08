@@ -2,15 +2,10 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 import { DBConnect } from './index.js';
 
-const ParkingAssignmentsSchema = new Schema({
-    parkingSpotId: {
+const EventRegistrationsSchema = new Schema({
+    eventId: {
         type: Schema.Types.ObjectId,
-        ref: 'parkingspots',
-        required: true
-    },
-    vehicleId: {
-        type: Schema.Types.ObjectId,
-        ref: 'vehicles',
+        ref: 'events',
         required: true
     },
     memberId: {
@@ -18,21 +13,39 @@ const ParkingAssignmentsSchema = new Schema({
         ref: 'members',
         required: true
     },
+    unitId: {
+        type: Schema.Types.ObjectId,
+        ref: 'units',
+        required: true
+    },
     buildingId: {
         type: Schema.Types.ObjectId,
         ref: 'buildings',
         required: true
     },
-    assignmentStatus: {
+    registrationData: {
+        type: Map,
+        of: String // Dynamic form data
+    },
+    registrationDate: {
+        type: Date,
+        default: Date.now
+    },
+    attendance: {
+        checkInTime: Date,
+        checkOutTime: Date,
+        status: {
+            type: String,
+            enum: ['registered', 'attended', 'absent'],
+            default: 'registered'
+        }
+    },
+    qrCode: {
+        type: String
+    },
+    status: {
         type: String,
-        default: 'pending'
-    },
-    approvedBy: {
-        type: Schema.Types.ObjectId,
-        ref: 'users'
-    },
-    approvedAt: {
-        type: Date
+        default: 'active'
     },
     createdBy: {
         type: Schema.Types.ObjectId,
@@ -59,11 +72,11 @@ const ParkingAssignmentsSchema = new Schema({
     }
 });
 
-ParkingAssignmentsSchema.methods.toJSON = function () {
+EventRegistrationsSchema.methods.toJSON = function () {
     var obj = this.toObject();
     return obj;
 };
 
-const ParkingAssignmentsModel = DBConnect.model('parkingassignments', ParkingAssignmentsSchema);
+const EventRegistrationsModel = DBConnect.model('eventregistrations', EventRegistrationsSchema);
 
-export default ParkingAssignmentsModel;
+export default EventRegistrationsModel;

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import { DBConnect } from './index.js';
 
 const VehiclesSchema = new Schema({
     memberId: {
@@ -58,4 +58,4 @@ VehiclesSchema.methods.toJSON = function () {
 
 const VehiclesModel = DBConnect.model('vehicles', VehiclesSchema)
 
-module.exports = VehiclesModel
+export default VehiclesModel

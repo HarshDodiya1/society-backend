@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import { DBConnect } from './index.js';
 
 const BuildingGallerysSchema = new Schema({
     galleryFiles: [{
@@ -51,4 +51,4 @@ BuildingGallerysSchema.methods.toJSON = function () {
 
 const BuildingGallerysModel = DBConnect.model('buildinggallerys', BuildingGallerysSchema)
 
-module.exports = BuildingGallerysModel
+export default BuildingGallerysModel

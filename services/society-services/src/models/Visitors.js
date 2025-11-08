@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const VisitorsSchema = new Schema({
     visitorName: {
@@ -16,6 +16,11 @@ const VisitorsSchema = new Schema({
     },
     vehicleNumber: {
         type: String
+    },
+    visitorType: {
+        type: String,
+        enum: ['employee', 'member', 'tenant', 'vendor', 'delivery'],
+        default: 'member'
     },
     purpose: {
         type: String,
@@ -44,13 +49,15 @@ const VisitorsSchema = new Schema({
     },
     checkInTime: {
         type: Date,
-        required: true
+        required: true,
+        default: Date.now
     },
     checkOutTime: {
         type: Date
     },
     approvalStatus: {
         type: String,
+        enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
     approvedBy: {
@@ -59,6 +66,10 @@ const VisitorsSchema = new Schema({
     },
     approvedAt: {
         type: Date
+    },
+    status: {
+        type: String,
+        default: 'active'
     },
     createdBy: {
         type: Schema.Types.ObjectId,
@@ -76,6 +87,9 @@ const VisitorsSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    deletedAt: {
+        type: Date
+    },
     isDeleted: {
         type: Boolean,
         default: false
@@ -87,6 +101,6 @@ VisitorsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const VisitorsModel = DBConnect.model('visitors', VisitorsSchema)
+const VisitorsModel = DBConnect.model('visitors', VisitorsSchema);
 
-module.exports = VisitorsModel
+export default VisitorsModel;

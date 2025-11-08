@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const { DBConnect } = require('../models/index.js')
+import mongoose from 'mongoose';
+const Schema = mongoose.Schema;
+import { DBConnect } from './index.js';
 
 const AmenitySlotsSchema = new Schema({
     amenityId: {
@@ -16,9 +16,14 @@ const AmenitySlotsSchema = new Schema({
         type: String,
         required: true
     },
+    slotStatus: {
+        type: String,
+        enum: ['available', 'maintenance', 'unavailable'],
+        default: 'available'
+    },
     status: {
         type: String,
-        default: 'available'
+        default: 'active'
     },
     createdBy: {
         type: Schema.Types.ObjectId,
@@ -50,6 +55,6 @@ AmenitySlotsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const AmenitySlotsModel = DBConnect.model('amenityslots', AmenitySlotsSchema)
+const AmenitySlotsModel = DBConnect.model('amenityslots', AmenitySlotsSchema);
 
-module.exports = AmenitySlotsModel
+export default AmenitySlotsModel;
