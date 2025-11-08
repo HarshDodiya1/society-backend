@@ -91,10 +91,4 @@ MaintenanceBillsSchema.methods.toJSON = function () {
 
 const MaintenanceBillsModel = DBConnect.model('maintenancebills', MaintenanceBillsSchema)
 
-MaintenanceBillsModel.syncIndexes().then(() => {
-    console.log('Maintenance Bills Model Indexes Synced')
-}).catch((err) => {
-    console.log('Maintenance Bills Model Indexes Sync Error', err)
-})
-
 module.exports = MaintenanceBillsModel

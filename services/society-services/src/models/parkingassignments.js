@@ -66,10 +66,4 @@ ParkingAssignmentsSchema.methods.toJSON = function () {
 
 const ParkingAssignmentsModel = DBConnect.model('parkingassignments', ParkingAssignmentsSchema)
 
-ParkingAssignmentsModel.syncIndexes().then(() => {
-    console.log('Parking Assignments Model Indexes Synced')
-}).catch((err) => {
-    console.log('Parking Assignments Model Indexes Sync Error', err)
-})
-
 module.exports = ParkingAssignmentsModel

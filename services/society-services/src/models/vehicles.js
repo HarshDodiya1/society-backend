@@ -58,10 +58,4 @@ VehiclesSchema.methods.toJSON = function () {
 
 const VehiclesModel = DBConnect.model('vehicles', VehiclesSchema)
 
-VehiclesModel.syncIndexes().then(() => {
-    console.log('Vehicles Model Indexes Synced')
-}).catch((err) => {
-    console.log('Vehicles Model Indexes Sync Error', err)
-})
-
 module.exports = VehiclesModel

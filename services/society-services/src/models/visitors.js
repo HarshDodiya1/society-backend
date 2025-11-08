@@ -89,10 +89,4 @@ VisitorsSchema.methods.toJSON = function () {
 
 const VisitorsModel = DBConnect.model('visitors', VisitorsSchema)
 
-VisitorsModel.syncIndexes().then(() => {
-    console.log('Visitors Model Indexes Synced')
-}).catch((err) => {
-    console.log('Visitors Model Indexes Sync Error', err)
-})
-
 module.exports = VisitorsModel

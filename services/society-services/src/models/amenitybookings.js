@@ -78,10 +78,4 @@ AmenityBookingsSchema.methods.toJSON = function () {
 
 const AmenityBookingsModel = DBConnect.model('amenitybookings', AmenityBookingsSchema)
 
-AmenityBookingsModel.syncIndexes().then(() => {
-    console.log('Amenity Bookings Model Indexes Synced')
-}).catch((err) => {
-    console.log('Amenity Bookings Model Indexes Sync Error', err)
-})
-
 module.exports = AmenityBookingsModel

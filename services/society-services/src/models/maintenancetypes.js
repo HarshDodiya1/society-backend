@@ -47,10 +47,4 @@ MaintenanceTypesSchema.methods.toJSON = function () {
 
 const MaintenanceTypesModel = DBConnect.model('maintenancetypes', MaintenanceTypesSchema)
 
-MaintenanceTypesModel.syncIndexes().then(() => {
-    console.log('Maintenance Types Model Indexes Synced')
-}).catch((err) => {
-    console.log('Maintenance Types Model Indexes Sync Error', err)
-})
-
 module.exports = MaintenanceTypesModel

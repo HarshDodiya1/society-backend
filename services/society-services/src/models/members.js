@@ -117,10 +117,4 @@ MembersSchema.methods.toJSON = function () {
 
 const MembersModel = DBConnect.model('members', MembersSchema)
 
-MembersModel.syncIndexes().then(() => {
-    console.log('Members Model Indexes Synced')
-}).catch((err) => {
-    console.log('Members Model Indexes Sync Error', err)
-})
-
 module.exports = MembersModel

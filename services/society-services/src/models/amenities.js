@@ -82,10 +82,4 @@ AmenitiesSchema.methods.toJSON = function () {
 
 const AmenitiesModel = DBConnect.model('amenities', AmenitiesSchema)
 
-AmenitiesModel.syncIndexes().then(() => {
-    console.log('Amenities Model Indexes Synced')
-}).catch((err) => {
-    console.log('Amenities Model Indexes Sync Error', err)
-})
-
 module.exports = AmenitiesModel

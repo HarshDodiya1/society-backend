@@ -81,10 +81,4 @@ ComplaintsSchema.methods.toJSON = function () {
 
 const ComplaintsModel = DBConnect.model('complaints', ComplaintsSchema)
 
-ComplaintsModel.syncIndexes().then(() => {
-    console.log('Complaints Model Indexes Synced')
-}).catch((err) => {
-    console.log('Complaints Model Indexes Sync Error', err)
-})
-
 module.exports = ComplaintsModel

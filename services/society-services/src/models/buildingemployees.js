@@ -85,10 +85,4 @@ BuildingEmployeesSchema.methods.toJSON = function () {
 
 const BuildingEmployeesModel = DBConnect.model('buildingemployees', BuildingEmployeesSchema)
 
-BuildingEmployeesModel.syncIndexes().then(() => {
-    console.log('Building Employees Model Indexes Synced')
-}).catch((err) => {
-    console.log('Building Employees Model Indexes Sync Error', err)
-})
-
 module.exports = BuildingEmployeesModel

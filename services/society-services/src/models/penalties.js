@@ -82,10 +82,4 @@ PenaltiesSchema.methods.toJSON = function () {
 
 const PenaltiesModel = DBConnect.model('penalties', PenaltiesSchema)
 
-PenaltiesModel.syncIndexes().then(() => {
-    console.log('Penalties Model Indexes Synced')
-}).catch((err) => {
-    console.log('Penalties Model Indexes Sync Error', err)
-})
-
 module.exports = PenaltiesModel

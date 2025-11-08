@@ -75,10 +75,4 @@ UsersSchema.methods.toJSON = function () {
 
 const UsersModel = DBConnect.model('users', UsersSchema)
 
-UsersModel.syncIndexes().then(() => {
-    console.log('Users Model Indexes Synced')
-}).catch((err) => {
-    console.log('Users Model Indexes Sync Error', err)
-})
-
 module.exports = UsersModel

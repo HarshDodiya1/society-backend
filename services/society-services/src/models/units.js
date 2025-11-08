@@ -61,10 +61,4 @@ UnitsSchema.methods.toJSON = function () {
 
 const UnitsModel = DBConnect.model('units', UnitsSchema)
 
-UnitsModel.syncIndexes().then(() => {
-    console.log('Units Model Indexes Synced')
-}).catch((err) => {
-    console.log('Units Model Indexes Sync Error', err)
-})
-
 module.exports = UnitsModel

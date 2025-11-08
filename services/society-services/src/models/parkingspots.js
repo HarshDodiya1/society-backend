@@ -56,10 +56,4 @@ ParkingSpotsSchema.methods.toJSON = function () {
 
 const ParkingSpotsModel = DBConnect.model('parkingspots', ParkingSpotsSchema)
 
-ParkingSpotsModel.syncIndexes().then(() => {
-    console.log('Parking Spots Model Indexes Synced')
-}).catch((err) => {
-    console.log('Parking Spots Model Indexes Sync Error', err)
-})
-
 module.exports = ParkingSpotsModel

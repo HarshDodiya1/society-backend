@@ -56,10 +56,4 @@ FloorsSchema.methods.toJSON = function () {
 
 const FloorsModel = DBConnect.model('floors', FloorsSchema)
 
-FloorsModel.syncIndexes().then(() => {
-    console.log('Floors Model Indexes Synced')
-}).catch((err) => {
-    console.log('Floors Model Indexes Sync Error', err)
-})
-
 module.exports = FloorsModel
