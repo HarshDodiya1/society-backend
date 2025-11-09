@@ -15,3 +15,6 @@ services/user-services/src/migrate-mongo-config.js
 services/user-services/src/logs
 
 helper/third-party-cred/*
+services/society-services/.dockerignore
+services/society-services/Dockerfile
+services/society-services/DEPLOYMENT.md
