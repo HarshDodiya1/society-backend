@@ -1,0 +1,16 @@
+{
+  "buildCommand": "npm install",
+  "outputDirectory": ".",
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    }
+  },
+  "regions": ["iad1"],
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}

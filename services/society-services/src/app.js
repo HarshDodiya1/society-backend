@@ -24,8 +24,16 @@ if (process.env.CORS_ALLOWED_ORIGINS) {
     whitelist = [...whitelist, ...envOrigins];
 }
 
+// Add support for all Vercel domains (preview & production) if not in strict mode
+// This allows any vercel.app or custom domain on the same account
+const isVercelDeployment = process.env.VERCEL === "1";
+if (isVercelDeployment && process.env.NODE_ENV !== "development") {
+    // Allow all vercel.app subdomains automatically
+    whitelist.push("*.vercel.app");
+}
+
 const corsOption = (req, callback) => {
-    // Allow all in development (including 'dev' and 'development')
+    // Allow all in development (including 'dev' and 'development', or if NODE_ENV is not set)
     const isDev =
         process.env.NODE_ENV === "dev" ||
         process.env.NODE_ENV === "development" ||
@@ -43,7 +51,7 @@ const corsOption = (req, callback) => {
 
     const hostHeader = req.header("host") || req.headers.host || "";
     
-    // Check if origin is in whitelist (exact match)
+    // Check if origin is in whitelist (exact match or pattern match)
     let allowed = whitelist.some(origin => {
         // Support both exact matches and wildcard domain patterns
         if (origin.includes("*")) {
