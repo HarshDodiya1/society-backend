@@ -4,14 +4,25 @@ import routes from "./routes/index.js";
 
 // CORS configuration - use a whitelist similar to user-services
 // In dev environment we'll allow all origins for convenience, otherwise enforce whitelist based on the request host header.
-const whitelist = [
+
+// Default whitelist of allowed origins
+let whitelist = [
     "dev-sample-services.shivalikgroup.com",
     "35.154.180.15",
     "35.154.180.15:3011",
     "localhost:11001",
+    "localhost:3000",
+    "localhost:5000",
     "127.0.0.1",
+    "127.0.0.1:5000",
     // "http://10.0.2.2:5000",
 ];
+
+// Add environment-specific allowed origins
+if (process.env.CORS_ALLOWED_ORIGINS) {
+    const envOrigins = process.env.CORS_ALLOWED_ORIGINS.split(",").map(o => o.trim());
+    whitelist = [...whitelist, ...envOrigins];
+}
 
 const corsOption = (req, callback) => {
     // Allow all in development (including 'dev' and 'development')
@@ -31,7 +42,16 @@ const corsOption = (req, callback) => {
     }
 
     const hostHeader = req.header("host") || req.headers.host || "";
-    const allowed = whitelist.indexOf(hostHeader) !== -1;
+    
+    // Check if origin is in whitelist (exact match)
+    let allowed = whitelist.some(origin => {
+        // Support both exact matches and wildcard domain patterns
+        if (origin.includes("*")) {
+            const pattern = origin.replace(/\*/g, ".*");
+            return new RegExp(`^${pattern}$`).test(hostHeader);
+        }
+        return origin === hostHeader;
+    });
 
     if (allowed) {
         console.log("✅ CORS: Request allowed from", hostHeader);
@@ -44,7 +64,7 @@ const corsOption = (req, callback) => {
     } else {
         // Deny CORS - callers will receive an error
         const err = new Error(`Not allowed by CORS : ${hostHeader}`);
-        console.warn("❌ CORS blocked request from", hostHeader);
+        console.warn("❌ CORS blocked request from", hostHeader, "| Whitelist:", whitelist);
         callback(err, { origin: false });
     }
 };
