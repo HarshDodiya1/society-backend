@@ -54,12 +54,10 @@ export const getResidentDashboard = async (req, res) => {
 
         // Get pending maintenance bill
         const pendingBill = await MaintenanceBillsModel.findOne({
-            buildingId,
-            billStatus: 'published',
-            isDeleted: false
+            unitId,
+            isPaid: false
         })
-            .sort({ createdAt: -1 })
-            .populate('maintenanceTypeId');
+            .sort({ dueDate: -1 });
 
         // Get upcoming events (next 3)
         const upcomingEvents = await EventsModel.find({
@@ -117,11 +115,10 @@ export const getResidentDashboard = async (req, res) => {
             recentNotices,
             pendingBill: pendingBill ? {
                 _id: pendingBill._id,
-                billMonth: pendingBill.billMonth,
-                billYear: pendingBill.billYear,
+                month: pendingBill.month,
+                year: pendingBill.year,
                 amount: pendingBill.amount,
-                dueDate: pendingBill.dueDate,
-                maintenanceType: pendingBill.maintenanceTypeId?.typeName
+                dueDate: pendingBill.dueDate
             } : null,
             upcomingEvents,
             parkingInfo: parkingSpot ? {
@@ -170,9 +167,9 @@ export const getQuickStats = async (req, res) => {
                 isDeleted: false
             }),
             MaintenanceBillsModel.findOne({
-                billStatus: 'published',
-                isDeleted: false
-            }).sort({ createdAt: -1 })
+                unitId,
+                isPaid: false
+            }).sort({ dueDate: -1 })
         ]);
 
         return successResponse(res, {

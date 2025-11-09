@@ -1,5 +1,6 @@
 import MaintenanceBillsModel from '../models/MaintenanceBills.js';
 import UnitsModel from '../models/Units.js';
+import BlocksModel from '../models/Blocks.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 // Admin: Get all bills (view who paid and who didn't)
@@ -128,5 +129,86 @@ export const seedSampleBills = async (req, res) => {
     } catch (error) {
         console.error('Seed sample bills error:', error);
         return errorResponse(res, error.message || 'Failed to create sample bills', 500);
+    }
+};
+
+// Admin: Generate bills for all units in a building for a specific month
+export const generateBillsForAllUnits = async (req, res) => {
+    try {
+        const { buildingId, month, year, amount } = req.body;
+
+        if (!buildingId || !month || !year || !amount) {
+            return errorResponse(res, 'Building ID, month, year, and amount are required', 400);
+        }
+
+        // Validate month and year
+        if (month < 1 || month > 12) {
+            return errorResponse(res, 'Month must be between 1 and 12', 400);
+        }
+        if (year < 2020 || year > 2100) {
+            return errorResponse(res, 'Invalid year', 400);
+        }
+
+        // Check if bills already exist for this building/month/year
+        const existingBills = await MaintenanceBillsModel.find({ buildingId, month, year });
+        if (existingBills.length > 0) {
+            return errorResponse(res, `Bills already exist for ${month}/${year}. Found ${existingBills.length} bills.`, 400);
+        }
+
+        // Get all blocks in the building
+        const blocks = await BlocksModel.find({
+            buildingId,
+            isDeleted: false,
+            status: 'active'
+        });
+
+        if (blocks.length === 0) {
+            return errorResponse(res, 'No active blocks found in this building', 404);
+        }
+
+        const blockIds = blocks.map(block => block._id);
+
+        // Get all units in the building (through blocks)
+        const units = await UnitsModel.find({
+            blockId: { $in: blockIds },
+            isDeleted: false,
+            status: 'active'
+        });
+
+        if (units.length === 0) {
+            return errorResponse(res, 'No active units found in this building', 404);
+        }
+
+        // Create due date (15th of the month)
+        const dueDate = new Date(year, month - 1, 15);
+
+        // Generate bills for all units
+        const billsToCreate = units.map(unit => ({
+            unitId: unit._id,
+            buildingId: buildingId,
+            month: parseInt(month),
+            year: parseInt(year),
+            amount: parseFloat(amount),
+            dueDate: dueDate,
+            isPaid: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }));
+
+        // Insert all bills
+        const createdBills = await MaintenanceBillsModel.insertMany(billsToCreate);
+
+        console.log(`✅ Generated ${createdBills.length} maintenance bills for ${month}/${year}`);
+
+        return successResponse(res, {
+            count: createdBills.length,
+            month,
+            year,
+            amount,
+            bills: createdBills
+        }, `Successfully generated ${createdBills.length} bills for all units`);
+    } catch (error) {
+        console.error('Generate bills error:', error);
+        return errorResponse(res, error.message || 'Failed to generate bills', 500);
     }
 };

@@ -4,7 +4,8 @@ import {
     getUnitBills,
     getBillById,
     payBill,
-    seedSampleBills
+    seedSampleBills,
+    generateBillsForAllUnits
 } from '../controllers/maintenanceController.js';
 
 const router = express.Router();
@@ -23,5 +24,8 @@ router.post('/bills/pay', payBill);
 
 // Development: Seed sample bills (for testing)
 router.post('/bills/seed', seedSampleBills);
+
+// Admin: Generate bills for all units in a building
+router.post('/bills/generate', generateBillsForAllUnits);
 
 export default router;
