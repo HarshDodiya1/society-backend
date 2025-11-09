@@ -3,16 +3,39 @@ import { successResponse, errorResponse } from '../utils/response.js';
 
 export const createComplaint = async (req, res) => {
     try {
+        console.log('📝 Create Complaint - Request body:', JSON.stringify(req.body, null, 2));
+
         const {
             title, category, priority, description, images, complaintType,
             buildingId, unitId, memberId
         } = req.body;
 
-        if (!title || !category || !priority || !description || !complaintType || !buildingId || !memberId) {
-            return errorResponse(res, 'Required fields are missing', 400);
+        // Log individual fields for debugging
+        console.log('Fields received:', {
+            title, category, priority, description, complaintType, buildingId,
+            hasImages: !!images, hasUnitId: !!unitId, hasMemberId: !!memberId
+        });
+
+        // Validate required fields
+        const missingFields = [];
+        if (!title) missingFields.push('title');
+        if (!category) missingFields.push('category');
+        if (!priority) missingFields.push('priority');
+        if (!description) missingFields.push('description');
+        if (!complaintType) missingFields.push('complaintType');
+        if (!buildingId) missingFields.push('buildingId');
+
+        if (missingFields.length > 0) {
+            console.error('❌ Missing fields:', missingFields);
+            return errorResponse(res, `Missing required fields: ${missingFields.join(', ')}`, 400);
         }
 
-        const newComplaint = await ComplaintsModel.create({
+        // For unit complaints, unitId is required
+        if (complaintType === 'unit' && !unitId) {
+            return errorResponse(res, 'Unit ID is required for unit complaints', 400);
+        }
+
+        const complaintData = {
             title,
             category,
             priority,
@@ -20,17 +43,23 @@ export const createComplaint = async (req, res) => {
             images: images || [],
             complaintType,
             buildingId,
-            unitId,
-            memberId,
+            unitId: unitId || null,
+            memberId: memberId || null,
             complaintStatus: 'open',
             followUps: [],
             createdBy: req.user?._id,
             status: 'active'
-        });
+        };
+
+        console.log('Creating complaint with data:', complaintData);
+
+        const newComplaint = await ComplaintsModel.create(complaintData);
+
+        console.log('✅ Complaint created:', newComplaint._id);
 
         return successResponse(res, newComplaint, 'Complaint created successfully', 201);
     } catch (error) {
-        console.error('Create complaint error:', error);
+        console.error('❌ Create complaint error:', error);
         return errorResponse(res, error.message || 'Failed to create complaint', 500);
     }
 };
@@ -219,8 +248,12 @@ export const getComplaintStats = async (req, res) => {
             return errorResponse(res, 'Building ID is required', 400);
         }
 
+        // Convert buildingId string to ObjectId for aggregation
+        const mongoose = await import('mongoose');
+        const buildingObjectId = new mongoose.default.Types.ObjectId(buildingId);
+
         const stats = await ComplaintsModel.aggregate([
-            { $match: { buildingId, isDeleted: false } },
+            { $match: { buildingId: buildingObjectId, isDeleted: false } },
             { $group: { _id: '$complaintStatus', count: { $sum: 1 } } }
         ]);
 
@@ -235,9 +268,13 @@ export const getComplaintStats = async (req, res) => {
         };
 
         stats.forEach(stat => {
-            statsObj[stat._id] = stat.count;
+            if (stat._id && statsObj.hasOwnProperty(stat._id)) {
+                statsObj[stat._id] = stat.count;
+            }
             statsObj.all += stat.count;
         });
+
+        console.log('✅ Complaint stats:', statsObj);
 
         return successResponse(res, statsObj, 'Complaint stats fetched successfully');
     } catch (error) {

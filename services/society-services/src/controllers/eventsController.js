@@ -10,32 +10,40 @@ export const createEvent = async (req, res) => {
             endTime, registrationLimit, registrationFields
         } = req.body;
 
-        if (!title || !description || !buildingId || !venue || !eventDate || !startTime || !endTime || !registrationLimit) {
-            return errorResponse(res, 'Required fields are missing', 400);
+        // Validate required fields
+        if (!title || !description || !buildingId || !venue || !eventDate || !startTime || !endTime) {
+            return errorResponse(res, 'Required fields are missing (title, description, buildingId, venue, eventDate, startTime, endTime)', 400);
         }
 
-        const newEvent = await EventsModel.create({
+        // Default registration limit if not provided
+        const regLimit = registrationLimit || 100;
+
+        const eventData = {
             title,
             description,
-            banner,
+            banner: banner || null,
             buildingId,
             blockIds: blockIds || [],
             floorIds: floorIds || [],
             unitIds: unitIds || [],
             targetUserTypes: targetUserTypes || ['owner', 'tenant'],
-            territory,
+            territory: territory || null,
             venue,
-            venueLocation,
+            venueLocation: venueLocation || null,
             eventDate,
             startTime,
             endTime,
-            registrationLimit,
+            registrationLimit: regLimit,
             registrationFields: registrationFields || [],
             registrations: [],
             eventStatus: 'draft',
             createdBy: req.user?._id,
             status: 'active'
-        });
+        };
+
+        const newEvent = await EventsModel.create(eventData);
+
+        console.log('✅ Event created:', newEvent._id);
 
         return successResponse(res, newEvent, 'Event created successfully', 201);
     } catch (error) {
@@ -235,18 +243,22 @@ export const getEventAnalytics = async (req, res) => {
             return errorResponse(res, 'Event ID is required', 400);
         }
 
-        const event = await EventsModel.findOne({ _id: eventId, isDeleted: false });
+        // Convert eventId string to ObjectId
+        const mongoose = await import('mongoose');
+        const eventObjectId = new mongoose.default.Types.ObjectId(eventId);
+
+        const event = await EventsModel.findOne({ _id: eventObjectId, isDeleted: false });
         if (!event) {
             return errorResponse(res, 'Event not found', 404);
         }
 
         const totalRegistrations = await EventRegistrationsModel.countDocuments({
-            eventId,
+            eventId: eventObjectId,
             isDeleted: false
         });
 
         const attendanceStats = await EventRegistrationsModel.aggregate([
-            { $match: { eventId, isDeleted: false } },
+            { $match: { eventId: eventObjectId, isDeleted: false } },
             { $group: { _id: '$attendance.status', count: { $sum: 1 } } }
         ]);
 
@@ -262,6 +274,8 @@ export const getEventAnalytics = async (req, res) => {
             },
             availableSlots: event.registrationLimit - totalRegistrations
         };
+
+        console.log('✅ Event analytics:', analytics);
 
         return successResponse(res, analytics, 'Event analytics fetched successfully');
     } catch (error) {

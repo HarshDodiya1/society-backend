@@ -39,8 +39,8 @@ const ComplaintsSchema = new Schema({
     },
     memberId: {
         type: Schema.Types.ObjectId,
-        ref: 'members',
-        required: true
+        ref: 'members'
+        // Not required - admin can create complaints without member reference
     },
     assignedToEmployeeId: {
         type: Schema.Types.ObjectId,

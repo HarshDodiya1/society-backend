@@ -61,7 +61,7 @@ const EventsSchema = new Schema({
     },
     registrationLimit: {
         type: Number,
-        required: true
+        default: 100 // Default limit if not specified
     },
     registrationFields: [{
         fieldName: String,

@@ -3,36 +3,59 @@ import { successResponse, errorResponse } from '../utils/response.js';
 
 export const createVisitor = async (req, res) => {
     try {
+        console.log('👤 Create Visitor - Request body:', JSON.stringify(req.body, null, 2));
+
         const {
             visitorName, phoneNumber, visitorImage, vehicleNumber, visitorType,
             purpose, buildingId, blockId, floorId, unitId, memberId
         } = req.body;
 
-        if (!visitorName || !phoneNumber || !purpose || !buildingId) {
-            return errorResponse(res, 'Required fields are missing', 400);
+        // Log individual fields for debugging
+        console.log('Fields received:', {
+            visitorName, phoneNumber, purpose, buildingId,
+            hasImage: !!visitorImage, hasVehicle: !!vehicleNumber,
+            visitorType, hasUnitId: !!unitId, hasMemberId: !!memberId
+        });
+
+        // Validate required fields
+        const missingFields = [];
+        if (!visitorName) missingFields.push('visitorName');
+        if (!phoneNumber) missingFields.push('phoneNumber');
+        if (!purpose) missingFields.push('purpose');
+        if (!buildingId) missingFields.push('buildingId');
+
+        if (missingFields.length > 0) {
+            console.error('❌ Missing fields:', missingFields);
+            return errorResponse(res, `Missing required fields: ${missingFields.join(', ')}`, 400);
         }
 
-        const newVisitor = await VisitorsModel.create({
+        const visitorData = {
             visitorName,
             phoneNumber,
-            visitorImage,
-            vehicleNumber,
+            visitorImage: visitorImage || null,
+            vehicleNumber: vehicleNumber || null,
             visitorType: visitorType || 'member',
             purpose,
             buildingId,
-            blockId,
-            floorId,
-            unitId,
-            memberId,
+            blockId: blockId || null,
+            floorId: floorId || null,
+            unitId: unitId || null,
+            memberId: memberId || null,
             checkInTime: new Date(),
             approvalStatus: 'pending',
             createdBy: req.user?._id,
             status: 'active'
-        });
+        };
+
+        console.log('Creating visitor with data:', visitorData);
+
+        const newVisitor = await VisitorsModel.create(visitorData);
+
+        console.log('✅ Visitor entry created:', newVisitor._id);
 
         return successResponse(res, newVisitor, 'Visitor entry created successfully', 201);
     } catch (error) {
-        console.error('Create visitor error:', error);
+        console.error('❌ Create visitor error:', error);
         return errorResponse(res, error.message || 'Failed to create visitor entry', 500);
     }
 };
@@ -76,19 +99,25 @@ export const getTodaysVisitors = async (req, res) => {
             return errorResponse(res, 'Building ID is required', 400);
         }
 
+        // Convert buildingId string to ObjectId
+        const mongoose = await import('mongoose');
+        const buildingObjectId = new mongoose.default.Types.ObjectId(buildingId);
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
         const visitors = await VisitorsModel.find({
-            buildingId,
+            buildingId: buildingObjectId,
             checkInTime: { $gte: today, $lt: tomorrow },
             isDeleted: false
         })
             .populate('unitId', 'unitNumber')
             .populate('memberId', 'firstName lastName')
             .sort({ checkInTime: -1 });
+
+        console.log(`✅ Found ${visitors.length} visitors for today`);
 
         return successResponse(res, visitors, 'Today\'s visitors fetched successfully');
     } catch (error) {
@@ -219,7 +248,11 @@ export const getVisitorStats = async (req, res) => {
             return errorResponse(res, 'Building ID is required', 400);
         }
 
-        const filter = { buildingId, isDeleted: false };
+        // Convert buildingId string to ObjectId
+        const mongoose = await import('mongoose');
+        const buildingObjectId = new mongoose.default.Types.ObjectId(buildingId);
+
+        const filter = { buildingId: buildingObjectId, isDeleted: false };
 
         if (startDate && endDate) {
             filter.checkInTime = {
@@ -243,9 +276,13 @@ export const getVisitorStats = async (req, res) => {
         };
 
         stats.forEach(stat => {
-            statsObj[stat._id] = stat.count;
+            if (stat._id && statsObj.hasOwnProperty(stat._id)) {
+                statsObj[stat._id] = stat.count;
+            }
             statsObj.total += stat.count;
         });
+
+        console.log('✅ Visitor stats:', statsObj);
 
         return successResponse(res, statsObj, 'Visitor stats fetched successfully');
     } catch (error) {

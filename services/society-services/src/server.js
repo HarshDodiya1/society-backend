@@ -59,21 +59,31 @@ const corsOption = (req, callback) => {
 
 // Middleware
 app.use(cors(corsOption));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' })); // Increased limit for large payloads
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Simple request logging middleware (without headers)
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
   console.log(`${timestamp} - ${req.method} ${req.url}`);
   
+  // Log content type
+  if (req.headers['content-type']) {
+    console.log('Content-Type:', req.headers['content-type']);
+  }
+  
   // Only log body for POST/PUT/PATCH requests (excluding sensitive data)
-  if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
-    const logBody = { ...req.body };
-    // Remove sensitive fields from logs
-    delete logBody.password;
-    delete logBody.token;
-    console.log('Body:', JSON.stringify(logBody).substring(0, 200));
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    if (req.body && Object.keys(req.body).length > 0) {
+      const logBody = { ...req.body };
+      // Remove sensitive fields from logs
+      delete logBody.password;
+      delete logBody.token;
+      console.log('Body keys:', Object.keys(logBody));
+      console.log('Body sample:', JSON.stringify(logBody).substring(0, 300));
+    } else {
+      console.warn('⚠️ Empty or missing request body');
+    }
   }
 
   // Log response status

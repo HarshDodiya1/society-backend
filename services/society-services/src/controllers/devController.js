@@ -16,6 +16,7 @@ import Complaints from '../models/Complaints.js';
 import Amenities from '../models/Amenities.js';
 import CommitteeMembers from '../models/CommitteeMembers.js';
 import BuildingEmployees from '../models/BuildingEmployees.js';
+import BuildingAdmins from '../models/buildingadmins.js';
 import ParkingAreas from '../models/ParkingAreas.js';
 import ParkingSpots from '../models/ParkingSpots.js';
 import ParkingRequests from '../models/ParkingRequests.js';
@@ -85,7 +86,17 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.employees = 0;
         }
 
-        // 5. Committee Members
+        // 5. Building Admins
+        try {
+            const buildingAdminsResult = await BuildingAdmins.deleteMany({});
+            deletionResults.buildingAdmins = buildingAdminsResult.deletedCount;
+            console.log(`✓ Deleted ${buildingAdminsResult.deletedCount} building admins`);
+        } catch (error) {
+            console.error('Error deleting building admins:', error.message);
+            deletionResults.buildingAdmins = 0;
+        }
+
+        // 6. Committee Members
         try {
             const committeeResult = await CommitteeMembers.deleteMany({});
             deletionResults.committeeMembers = committeeResult.deletedCount;
@@ -95,7 +106,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.committeeMembers = 0;
         }
 
-        // 6. Amenities
+        // 7. Amenities
         try {
             const amenitiesResult = await Amenities.deleteMany({});
             deletionResults.amenities = amenitiesResult.deletedCount;
@@ -105,7 +116,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.amenities = 0;
         }
 
-        // 7. Complaints
+        // 8. Complaints
         try {
             const complaintsResult = await Complaints.deleteMany({});
             deletionResults.complaints = complaintsResult.deletedCount;
@@ -115,7 +126,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.complaints = 0;
         }
 
-        // 8. Events
+        // 9. Events
         try {
             const eventsResult = await Events.deleteMany({});
             deletionResults.events = eventsResult.deletedCount;
@@ -125,7 +136,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.events = 0;
         }
 
-        // 9. Notices
+        // 10. Notices
         try {
             const noticesResult = await Notices.deleteMany({});
             deletionResults.notices = noticesResult.deletedCount;
@@ -135,7 +146,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.notices = 0;
         }
 
-        // 10. Members (before users since users reference members)
+        // 11. Members (before users since users reference members)
         try {
             const membersResult = await Members.deleteMany({});
             deletionResults.members = membersResult.deletedCount;
@@ -145,7 +156,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.members = 0;
         }
 
-        // 11. Units (before floors)
+        // 12. Units (before floors)
         try {
             const unitsResult = await Units.deleteMany({});
             deletionResults.units = unitsResult.deletedCount;
@@ -155,7 +166,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.units = 0;
         }
 
-        // 12. Floors (before blocks)
+        // 13. Floors (before blocks)
         try {
             const floorsResult = await Floors.deleteMany({});
             deletionResults.floors = floorsResult.deletedCount;
@@ -165,7 +176,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.floors = 0;
         }
 
-        // 13. Blocks (before buildings)
+        // 14. Blocks (before buildings)
         try {
             const blocksResult = await Blocks.deleteMany({});
             deletionResults.blocks = blocksResult.deletedCount;
@@ -175,7 +186,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.blocks = 0;
         }
 
-        // 14. Buildings
+        // 15. Buildings
         try {
             const buildingsResult = await Buildings.deleteMany({});
             deletionResults.buildings = buildingsResult.deletedCount;
@@ -185,7 +196,7 @@ export const cleanDatabase = async (req, res) => {
             deletionResults.buildings = 0;
         }
 
-        // 15. Users (last, after all dependencies)
+        // 16. Users (last, after all dependencies)
         try {
             const usersResult = await Users.deleteMany({});
             deletionResults.users = usersResult.deletedCount;
@@ -235,6 +246,7 @@ export const getDatabaseStats = async (req, res) => {
             amenities: await Amenities.countDocuments(),
             committeeMembers: await CommitteeMembers.countDocuments(),
             employees: await BuildingEmployees.countDocuments(),
+            buildingAdmins: await BuildingAdmins.countDocuments(),
             parking: await ParkingAreas.countDocuments(),
             visitors: await Visitors.countDocuments(),
             maintenanceBills: await MaintenanceBills.countDocuments(),
