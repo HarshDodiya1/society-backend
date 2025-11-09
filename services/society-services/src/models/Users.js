@@ -73,7 +73,12 @@ UsersSchema.methods.toJSON = function () {
     return obj;
 };
 
-const UsersModel = DBConnect.model('users', UsersSchema)
+// Indexes
+UsersSchema.index({ isDeleted: 1, status: 1 });
+UsersSchema.index({ createdAt: -1 });
+UsersSchema.index({ email: 1 }, { unique: true, sparse: true });
+
+const UsersModel = DBConnect.model('users', UsersSchema);
 
 UsersModel.syncIndexes().then(() => {
     console.log('Users Model Indexes Synced')
@@ -81,4 +86,4 @@ UsersModel.syncIndexes().then(() => {
     console.log('Users Model Indexes Sync Error', err)
 });
 
-export default UsersModel
+export default UsersModel;

@@ -80,7 +80,12 @@ PenaltiesSchema.methods.toJSON = function () {
     return obj;
 };
 
-const PenaltiesModel = DBConnect.model('penalties', PenaltiesSchema)
+// Indexes
+PenaltiesSchema.index({ buildingId: 1 });
+PenaltiesSchema.index({ isDeleted: 1, status: 1 });
+PenaltiesSchema.index({ createdAt: -1 });
+
+const PenaltiesModel = DBConnect.model('penalties', PenaltiesSchema);
 
 PenaltiesModel.syncIndexes().then(() => {
     console.log('Penalties Model Indexes Synced')
@@ -88,4 +93,4 @@ PenaltiesModel.syncIndexes().then(() => {
     console.log('Penalties Model Indexes Sync Error', err)
 });
 
-export default PenaltiesModel
+export default PenaltiesModel;

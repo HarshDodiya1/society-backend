@@ -88,6 +88,11 @@ CommitteeMembersSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+CommitteeMembersSchema.index({ buildingId: 1 });
+CommitteeMembersSchema.index({ isDeleted: 1, status: 1 });
+CommitteeMembersSchema.index({ createdAt: -1 });
+
 const CommitteeMembersModel = DBConnect.model('committeemembers', CommitteeMembersSchema);
 
 CommitteeMembersModel.syncIndexes().then(() => {

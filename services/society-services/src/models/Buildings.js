@@ -90,6 +90,11 @@ BuildingsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+BuildingsSchema.index({ buildingName: 1, pincode: 1 }, { unique: true, sparse: true });
+BuildingsSchema.index({ isDeleted: 1, status: 1 });
+BuildingsSchema.index({ createdAt: -1 });
+
 const BuildingsModel = DBConnect.model('buildings', BuildingsSchema);
 
 BuildingsModel.syncIndexes().then(() => {

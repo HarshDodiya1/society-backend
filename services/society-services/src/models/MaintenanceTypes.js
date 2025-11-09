@@ -45,7 +45,11 @@ MaintenanceTypesSchema.methods.toJSON = function () {
     return obj;
 };
 
-const MaintenanceTypesModel = DBConnect.model('maintenancetypes', MaintenanceTypesSchema)
+// Indexes
+MaintenanceTypesSchema.index({ isDeleted: 1, status: 1 });
+MaintenanceTypesSchema.index({ createdAt: -1 });
+
+const MaintenanceTypesModel = DBConnect.model('maintenancetypes', MaintenanceTypesSchema);
 
 MaintenanceTypesModel.syncIndexes().then(() => {
     console.log('MaintenanceTypes Model Indexes Synced')
@@ -53,4 +57,4 @@ MaintenanceTypesModel.syncIndexes().then(() => {
     console.log('MaintenanceTypes Model Indexes Sync Error', err)
 });
 
-export default MaintenanceTypesModel
+export default MaintenanceTypesModel;

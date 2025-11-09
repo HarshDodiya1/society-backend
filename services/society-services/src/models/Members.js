@@ -125,6 +125,11 @@ MembersSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+MembersSchema.index({ buildingId: 1 });
+MembersSchema.index({ isDeleted: 1, memberStatus: 1 });
+MembersSchema.index({ createdAt: -1 });
+
 const MembersModel = DBConnect.model('members', MembersSchema);
 
 MembersModel.syncIndexes().then(() => {

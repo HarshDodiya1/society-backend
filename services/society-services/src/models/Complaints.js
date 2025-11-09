@@ -120,6 +120,11 @@ ComplaintsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+ComplaintsSchema.index({ buildingId: 1 });
+ComplaintsSchema.index({ isDeleted: 1, complaintStatus: 1 });
+ComplaintsSchema.index({ createdAt: -1 });
+
 const ComplaintsModel = DBConnect.model('complaints', ComplaintsSchema);
 
 ComplaintsModel.syncIndexes().then(() => {

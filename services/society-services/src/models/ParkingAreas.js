@@ -62,6 +62,11 @@ ParkingAreasSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+ParkingAreasSchema.index({ buildingId: 1 });
+ParkingAreasSchema.index({ isDeleted: 1, status: 1 });
+ParkingAreasSchema.index({ createdAt: -1 });
+
 const ParkingAreasModel = DBConnect.model('parkingareas', ParkingAreasSchema);
 
 ParkingAreasModel.syncIndexes().then(() => {

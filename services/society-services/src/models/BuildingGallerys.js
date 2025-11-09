@@ -49,7 +49,12 @@ BuildingGallerysSchema.methods.toJSON = function () {
     return obj;
 };
 
-const BuildingGallerysModel = DBConnect.model('buildinggallerys', BuildingGallerysSchema)
+// Indexes
+BuildingGallerysSchema.index({ buildingId: 1 });
+BuildingGallerysSchema.index({ isDeleted: 1, status: 1 });
+BuildingGallerysSchema.index({ createdAt: -1 });
+
+const BuildingGallerysModel = DBConnect.model('buildinggallerys', BuildingGallerysSchema);
 
 BuildingGallerysModel.syncIndexes().then(() => {
     console.log('BuildingGallerys Model Indexes Synced')
@@ -57,4 +62,4 @@ BuildingGallerysModel.syncIndexes().then(() => {
     console.log('BuildingGallerys Model Indexes Sync Error', err)
 });
 
-export default BuildingGallerysModel
+export default BuildingGallerysModel;

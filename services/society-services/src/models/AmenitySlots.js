@@ -55,6 +55,11 @@ AmenitySlotsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+AmenitySlotsSchema.index({ buildingId: 1 });
+AmenitySlotsSchema.index({ isDeleted: 1, status: 1 });
+AmenitySlotsSchema.index({ createdAt: -1 });
+
 const AmenitySlotsModel = DBConnect.model('amenityslots', AmenitySlotsSchema);
 
 AmenitySlotsModel.syncIndexes().then(() => {

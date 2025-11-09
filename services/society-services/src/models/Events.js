@@ -112,6 +112,11 @@ EventsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+EventsSchema.index({ buildingId: 1 });
+EventsSchema.index({ isDeleted: 1, eventStatus: 1 });
+EventsSchema.index({ createdAt: -1 });
+
 const EventsModel = DBConnect.model('events', EventsSchema);
 
 EventsModel.syncIndexes().then(() => {

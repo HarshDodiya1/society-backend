@@ -67,6 +67,11 @@ BuildingAdminSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+BuildingAdminSchema.index({ buildingId: 1 });
+BuildingAdminSchema.index({ isDeleted: 1, status: 1 });
+BuildingAdminSchema.index({ createdAt: -1 });
+
 const BuildingAdminModel = DBConnect.model('buildingadmins', BuildingAdminSchema);
 
 BuildingAdminModel.syncIndexes().then(() => {

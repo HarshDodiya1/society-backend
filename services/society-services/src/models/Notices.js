@@ -92,6 +92,11 @@ NoticesSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+NoticesSchema.index({ buildingId: 1 });
+NoticesSchema.index({ isDeleted: 1, status: 1 });
+NoticesSchema.index({ createdAt: -1 });
+
 const NoticesModel = DBConnect.model('notices', NoticesSchema);
 
 NoticesModel.syncIndexes().then(() => {
