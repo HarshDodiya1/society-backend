@@ -3,7 +3,8 @@ import {
     getAllBills,
     getUnitBills,
     getBillById,
-    payBill
+    payBill,
+    seedSampleBills
 } from '../controllers/maintenanceController.js';
 
 const router = express.Router();
@@ -19,5 +20,8 @@ router.get('/bills/:id', getBillById);
 
 // Resident: Pay bill
 router.post('/bills/pay', payBill);
+
+// Development: Seed sample bills (for testing)
+router.post('/bills/seed', seedSampleBills);
 
 export default router;

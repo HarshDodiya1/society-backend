@@ -70,4 +70,63 @@ MaintenanceBillsModel.syncIndexes().then(() => {
     console.log('MaintenanceBills Model Indexes Sync Error', err)
 });
 
+// Sample Seed Data Function
+// Usage: Call MaintenanceBillsModel.seedSampleData(unitId, buildingId) to create sample bills
+MaintenanceBillsModel.seedSampleData = async function(unitId, buildingId) {
+    try {
+        // Check if bills already exist for this unit
+        const existingBills = await this.find({ unitId });
+        if (existingBills.length > 0) {
+            console.log('✅ Sample maintenance bills already exist for this unit');
+            return existingBills;
+        }
+
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth() + 1; // 1-12
+        const currentYear = currentDate.getFullYear();
+
+        const sampleBills = [];
+
+        // Create bills for last 6 months
+        for (let i = 0; i < 6; i++) {
+            let month = currentMonth - i;
+            let year = currentYear;
+
+            // Handle year rollover
+            if (month <= 0) {
+                month = month + 12;
+                year = year - 1;
+            }
+
+            // Create due date (15th of each month)
+            const dueDate = new Date(year, month - 1, 15);
+
+            // Determine if bill is paid (last 3 months paid, current month unpaid)
+            const isPaid = i >= 1;
+
+            const bill = {
+                unitId,
+                buildingId,
+                month,
+                year,
+                amount: 5000, // ₹5000 per month
+                dueDate,
+                isPaid,
+                paidDate: isPaid ? new Date(year, month - 1, Math.floor(Math.random() * 10) + 5) : null,
+                paymentMethod: isPaid ? ['UPI', 'Credit Card', 'Net Banking'][Math.floor(Math.random() * 3)] : null,
+                transactionId: isPaid ? `TXN${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}` : null,
+            };
+
+            sampleBills.push(bill);
+        }
+
+        const createdBills = await this.insertMany(sampleBills);
+        console.log(`✅ Created ${createdBills.length} sample maintenance bills`);
+        return createdBills;
+    } catch (error) {
+        console.error('❌ Error seeding sample maintenance bills:', error);
+        throw error;
+    }
+};
+
 export default MaintenanceBillsModel;

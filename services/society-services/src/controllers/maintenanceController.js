@@ -105,3 +105,28 @@ export const payBill = async (req, res) => {
         return errorResponse(res, error.message || 'Failed to process payment', 500);
     }
 };
+
+// Development: Seed sample bills for a unit
+export const seedSampleBills = async (req, res) => {
+    try {
+        const { unitId, buildingId } = req.body;
+
+        if (!unitId || !buildingId) {
+            return errorResponse(res, 'Unit ID and Building ID are required', 400);
+        }
+
+        // Verify unit exists
+        const unit = await UnitsModel.findById(unitId);
+        if (!unit) {
+            return errorResponse(res, 'Unit not found', 404);
+        }
+
+        // Seed sample data
+        const bills = await MaintenanceBillsModel.seedSampleData(unitId, buildingId);
+
+        return successResponse(res, bills, 'Sample bills created successfully');
+    } catch (error) {
+        console.error('Seed sample bills error:', error);
+        return errorResponse(res, error.message || 'Failed to create sample bills', 500);
+    }
+};

@@ -1,99 +1,108 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
-import { DBConnect } from './index.js';
+import { DBConnect } from "./index.js";
 
 const VisitorsSchema = new Schema({
     visitorName: {
         type: String,
-        required: true
+        required: true,
     },
     phoneNumber: {
         type: String,
-        required: true
+        required: true,
     },
     visitorImage: {
-        type: String
+        type: String,
     },
     vehicleNumber: {
-        type: String
+        type: String,
     },
     visitorType: {
         type: String,
-        enum: ['employee', 'member', 'tenant', 'vendor', 'delivery'],
-        default: 'member'
+        enum: [
+            "guest",
+            "service",
+            "cab",
+            "employee",
+            "member",
+            "tenant",
+            "vendor",
+            "delivery",
+        ],
+        default: "member",
     },
     purpose: {
         type: String,
-        required: true
+        required: true,
     },
     buildingId: {
         type: Schema.Types.ObjectId,
-        ref: 'buildings',
-        required: true
+        ref: "buildings",
+        required: true,
     },
     blockId: {
         type: Schema.Types.ObjectId,
-        ref: 'blocks'
+        ref: "blocks",
     },
     floorId: {
         type: Schema.Types.ObjectId,
-        ref: 'floors'
+        ref: "floors",
     },
     unitId: {
         type: Schema.Types.ObjectId,
-        ref: 'units'
+        ref: "units",
     },
     memberId: {
         type: Schema.Types.ObjectId,
-        ref: 'members'
+        ref: "members",
     },
     checkInTime: {
         type: Date,
         required: true,
-        default: Date.now
+        default: Date.now,
     },
     checkOutTime: {
-        type: Date
+        type: Date,
     },
     approvalStatus: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending'
+        enum: ["pending", "approved", "rejected"],
+        default: "pending",
     },
     approvedBy: {
         type: Schema.Types.ObjectId,
-        ref: 'users'
+        ref: "users",
     },
     approvedAt: {
-        type: Date
+        type: Date,
     },
     status: {
         type: String,
-        default: 'active'
+        default: "active",
     },
     createdBy: {
         type: Schema.Types.ObjectId,
-        ref: 'users'
+        ref: "users",
     },
     updatedBy: {
         type: Schema.Types.ObjectId,
-        ref: 'users'
+        ref: "users",
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
     updatedAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
     deletedAt: {
-        type: Date
+        type: Date,
     },
     isDeleted: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 });
 
 VisitorsSchema.methods.toJSON = function () {
@@ -106,12 +115,14 @@ VisitorsSchema.index({ buildingId: 1 });
 VisitorsSchema.index({ isDeleted: 1, status: 1 });
 VisitorsSchema.index({ createdAt: -1 });
 
-const VisitorsModel = DBConnect.model('visitors', VisitorsSchema);
+const VisitorsModel = DBConnect.model("visitors", VisitorsSchema);
 
-VisitorsModel.syncIndexes().then(() => {
-    console.log('Visitors Model Indexes Synced')
-}).catch((err) => {
-    console.log('Visitors Model Indexes Sync Error', err)
-});
+VisitorsModel.syncIndexes()
+    .then(() => {
+        console.log("Visitors Model Indexes Synced");
+    })
+    .catch((err) => {
+        console.log("Visitors Model Indexes Sync Error", err);
+    });
 
 export default VisitorsModel;
