@@ -57,4 +57,10 @@ AmenitySlotsSchema.methods.toJSON = function () {
 
 const AmenitySlotsModel = DBConnect.model('amenityslots', AmenitySlotsSchema);
 
+AmenitySlotsModel.syncIndexes().then(() => {
+    console.log('AmenitySlots Model Indexes Synced')
+}).catch((err) => {
+    console.log('AmenitySlots Model Indexes Sync Error', err)
+});
+
 export default AmenitySlotsModel;

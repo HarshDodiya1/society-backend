@@ -86,4 +86,10 @@ ParkingRequestsSchema.methods.toJSON = function () {
 
 const ParkingRequestsModel = DBConnect.model('parkingrequests', ParkingRequestsSchema);
 
+ParkingRequestsModel.syncIndexes().then(() => {
+    console.log('ParkingRequests Model Indexes Synced')
+}).catch((err) => {
+    console.log('ParkingRequests Model Indexes Sync Error', err)
+});
+
 export default ParkingRequestsModel;

@@ -48,4 +48,10 @@ BlocksSchema.methods.toJSON = function () {
 
 const BlocksModel = DBConnect.model('blocks', BlocksSchema);
 
+BlocksModel.syncIndexes().then(() => {
+    console.log('Blocks Model Indexes Synced')
+}).catch((err) => {
+    console.log('Blocks Model Indexes Sync Error', err)
+});
+
 export default BlocksModel;

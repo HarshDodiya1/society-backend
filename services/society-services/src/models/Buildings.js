@@ -92,4 +92,10 @@ BuildingsSchema.methods.toJSON = function () {
 
 const BuildingsModel = DBConnect.model('buildings', BuildingsSchema);
 
+BuildingsModel.syncIndexes().then(() => {
+    console.log('Buildings Model Indexes Synced')
+}).catch((err) => {
+    console.log('Buildings Model Indexes Sync Error', err)
+});
+
 export default BuildingsModel;

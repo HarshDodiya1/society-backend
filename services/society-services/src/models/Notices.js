@@ -94,4 +94,10 @@ NoticesSchema.methods.toJSON = function () {
 
 const NoticesModel = DBConnect.model('notices', NoticesSchema);
 
+NoticesModel.syncIndexes().then(() => {
+    console.log('Notices Model Indexes Synced')
+}).catch((err) => {
+    console.log('Notices Model Indexes Sync Error', err)
+});
+
 export default NoticesModel;

@@ -69,4 +69,10 @@ BuildingAdminSchema.methods.toJSON = function () {
 
 const BuildingAdminModel = DBConnect.model('buildingadmins', BuildingAdminSchema);
 
+BuildingAdminModel.syncIndexes().then(() => {
+    console.log('BuildingAdmin Model Indexes Synced')
+}).catch((err) => {
+    console.log('BuildingAdmin Model Indexes Sync Error', err)
+});
+
 export default BuildingAdminModel;

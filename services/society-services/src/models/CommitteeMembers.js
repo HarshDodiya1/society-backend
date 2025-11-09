@@ -85,4 +85,10 @@ CommitteeMembersSchema.methods.toJSON = function () {
 
 const CommitteeMembersModel = DBConnect.model('committeemembers', CommitteeMembersSchema);
 
+CommitteeMembersModel.syncIndexes().then(() => {
+    console.log('CommitteeMembers Model Indexes Synced')
+}).catch((err) => {
+    console.log('CommitteeMembers Model Indexes Sync Error', err)
+});
+
 export default CommitteeMembersModel;

@@ -79,4 +79,10 @@ EventRegistrationsSchema.methods.toJSON = function () {
 
 const EventRegistrationsModel = DBConnect.model('eventregistrations', EventRegistrationsSchema);
 
+EventRegistrationsModel.syncIndexes().then(() => {
+    console.log('EventRegistrations Model Indexes Synced')
+}).catch((err) => {
+    console.log('EventRegistrations Model Indexes Sync Error', err)
+});
+
 export default EventRegistrationsModel;

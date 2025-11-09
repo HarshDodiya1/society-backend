@@ -51,4 +51,10 @@ BuildingGallerysSchema.methods.toJSON = function () {
 
 const BuildingGallerysModel = DBConnect.model('buildinggallerys', BuildingGallerysSchema)
 
+BuildingGallerysModel.syncIndexes().then(() => {
+    console.log('BuildingGallerys Model Indexes Synced')
+}).catch((err) => {
+    console.log('BuildingGallerys Model Indexes Sync Error', err)
+});
+
 export default BuildingGallerysModel

@@ -114,4 +114,10 @@ EventsSchema.methods.toJSON = function () {
 
 const EventsModel = DBConnect.model('events', EventsSchema);
 
+EventsModel.syncIndexes().then(() => {
+    console.log('Events Model Indexes Synced')
+}).catch((err) => {
+    console.log('Events Model Indexes Sync Error', err)
+});
+
 export default EventsModel;

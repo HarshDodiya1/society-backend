@@ -64,4 +64,10 @@ MaintenancePaymentsSchema.methods.toJSON = function () {
 
 const MaintenancePaymentsModel = DBConnect.model('maintenancepayments', MaintenancePaymentsSchema)
 
+MaintenancePaymentsModel.syncIndexes().then(() => {
+    console.log('MaintenancePayments Model Indexes Synced')
+}).catch((err) => {
+    console.log('MaintenancePayments Model Indexes Sync Error', err)
+});
+
 export default MaintenancePaymentsModel
