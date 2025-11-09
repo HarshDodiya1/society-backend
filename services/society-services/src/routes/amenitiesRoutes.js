@@ -8,7 +8,9 @@ import {
     createAmenitySlot,
     getAmenitySlots,
     updateAmenitySlot,
-    deleteAmenitySlot
+    deleteAmenitySlot,
+    getAllBookings,
+    updateBookingStatus
 } from '../controllers/amenitiesController.js';
 
 const router = express.Router();
@@ -23,5 +25,9 @@ router.post('/slots', createAmenitySlot);
 router.get('/slots', getAmenitySlots);
 router.put('/slots/:id', updateAmenitySlot);
 router.delete('/slots/:id', deleteAmenitySlot);
+
+// Bookings management
+router.get('/bookings/all', getAllBookings);
+router.put('/bookings/:id/status', updateBookingStatus);
 
 export default router;

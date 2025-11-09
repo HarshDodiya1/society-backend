@@ -1,5 +1,6 @@
 import CommitteeMembersModel from '../models/CommitteeMembers.js';
 import MembersModel from '../models/Members.js';
+import UsersModel from '../models/Users.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 export const createCommitteeMember = async (req, res) => {
@@ -13,14 +14,52 @@ export const createCommitteeMember = async (req, res) => {
             return errorResponse(res, 'Required fields are missing', 400);
         }
 
+        // Normalize country code - ensure it's always the code (e.g., "+91") not the name
+        const normalizedCountryCode = countryCode && countryCode.startsWith('+') ? countryCode : '+91';
+        const normalizedCountryCodeName = countryCodeName || 'IN';
+
+        // Check if user already exists with this phone number
+        let user = await UsersModel.findOne({
+            phoneNumber,
+            countryCode: normalizedCountryCode,
+            isDeleted: false
+        });
+
+        // If user doesn't exist, create one
+        if (!user) {
+            user = await UsersModel.create({
+                firstName,
+                lastName,
+                userName: `${phoneNumber}_committee`,
+                countryCodeName: normalizedCountryCodeName,
+                countryCode: normalizedCountryCode,
+                phoneNumber,
+                email,
+                isbuildingMember: true,
+                isbuildingEmployee: false,
+                status: 'active',
+                createdBy: req.user?._id
+            });
+        } else {
+            // Update existing user to be a building member
+            if (!user.isbuildingMember) {
+                user.isbuildingMember = true;
+                user.updatedBy = req.user?._id;
+                user.updatedAt = new Date();
+                await user.save();
+            }
+        }
+
+        // Create committee member with userId
         const newCommitteeMember = await CommitteeMembersModel.create({
             firstName,
             lastName,
-            countryCodeName: countryCodeName || 'IN',
-            countryCode: countryCode || '+91',
+            countryCodeName: normalizedCountryCodeName,
+            countryCode: normalizedCountryCode,
             phoneNumber,
             email,
             committeeType,
+            userId: user._id,
             memberId,
             buildingId,
             startDate,
@@ -29,7 +68,10 @@ export const createCommitteeMember = async (req, res) => {
             createdBy: req.user?._id
         });
 
-        return successResponse(res, newCommitteeMember, 'Committee member added successfully', 201);
+        // Populate the userId field before returning
+        await newCommitteeMember.populate('userId', 'firstName lastName phoneNumber email');
+
+        return successResponse(res, newCommitteeMember, 'Committee member added successfully and user account created', 201);
     } catch (error) {
         console.error('Create committee member error:', error);
         return errorResponse(res, error.message || 'Failed to add committee member', 500);
@@ -48,6 +90,7 @@ export const getCommitteeMembers = async (req, res) => {
         const committeeMembers = await CommitteeMembersModel.find(filter)
             .populate('buildingId', 'buildingName societyName')
             .populate('memberId', 'firstName lastName unitId')
+            .populate('userId', 'firstName lastName phoneNumber email isbuildingMember')
             .sort({ committeeType: 1, createdAt: -1 });
 
         return successResponse(res, committeeMembers, 'Committee members fetched successfully');
@@ -63,7 +106,8 @@ export const getCommitteeMemberById = async (req, res) => {
 
         const committeeMember = await CommitteeMembersModel.findOne({ _id: id, isDeleted: false })
             .populate('buildingId', 'buildingName societyName')
-            .populate('memberId', 'firstName lastName unitId');
+            .populate('memberId', 'firstName lastName unitId')
+            .populate('userId', 'firstName lastName phoneNumber email isbuildingMember');
 
         if (!committeeMember) {
             return errorResponse(res, 'Committee member not found', 404);

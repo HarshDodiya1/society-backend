@@ -1,27 +1,23 @@
 import express from 'express';
 import {
-    createMaintenanceBill,
-    getMaintenanceBills,
-    getMaintenanceBillById,
-    updateMaintenanceBill,
-    publishMaintenanceBill,
-    deleteMaintenanceBill,
-    getMaintenanceBillStats,
-    createMaintenanceType,
-    getMaintenanceTypes
+    getAllBills,
+    getUnitBills,
+    getBillById,
+    payBill
 } from '../controllers/maintenanceController.js';
 
 const router = express.Router();
 
-router.post('/bills', createMaintenanceBill);
-router.get('/bills', getMaintenanceBills);
-router.get('/bills/stats', getMaintenanceBillStats);
-router.get('/bills/:id', getMaintenanceBillById);
-router.put('/bills/:id', updateMaintenanceBill);
-router.put('/bills/:id/publish', publishMaintenanceBill);
-router.delete('/bills/:id', deleteMaintenanceBill);
+// Admin: Get all bills
+router.get('/bills', getAllBills);
 
-router.post('/types', createMaintenanceType);
-router.get('/types', getMaintenanceTypes);
+// Resident: Get bills for unit
+router.get('/bills/unit', getUnitBills);
+
+// Resident: Get bill by ID
+router.get('/bills/:id', getBillById);
+
+// Resident: Pay bill
+router.post('/bills/pay', payBill);
 
 export default router;

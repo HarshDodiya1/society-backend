@@ -32,6 +32,11 @@ const CommitteeMembersSchema = new Schema({
         enum: ['Chairman', 'Secretary', 'Treasurer', 'Member'],
         required: true
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+        required: true
+    },
     memberId: {
         type: Schema.Types.ObjectId,
         ref: 'members'

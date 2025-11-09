@@ -51,6 +51,25 @@ const ComplaintsSchema = new Schema({
         enum: ['open', 'in-process', 'on-hold', 'close', 're-open', 'dismiss'],
         default: 'open'
     },
+    replies: [{
+        message: {
+            type: String,
+            required: true
+        },
+        isAdminReply: {
+            type: Boolean,
+            default: false
+        },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'users',
+            required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     followUps: [{
         remarks: String,
         nextFollowUpDate: Date,

@@ -207,3 +207,76 @@ export const deleteAmenitySlot = async (req, res) => {
         return errorResponse(res, error.message || 'Failed to delete amenity slot', 500);
     }
 };
+
+// Get all bookings for admin
+export const getAllBookings = async (req, res) => {
+    try {
+        const { buildingId, bookingStatus, amenityId, startDate, endDate } = req.query;
+
+        const filter = { isDeleted: false };
+        if (buildingId) filter.buildingId = buildingId;
+        if (bookingStatus) filter.bookingStatus = bookingStatus;
+        if (amenityId) filter.amenityId = amenityId;
+
+        if (startDate || endDate) {
+            filter.bookingDate = {};
+            if (startDate) filter.bookingDate.$gte = new Date(startDate);
+            if (endDate) filter.bookingDate.$lte = new Date(endDate);
+        }
+
+        const bookings = await AmenityBookingsModel.find(filter)
+            .populate('amenityId', 'name description images amenityType bookingCharge')
+            .populate({
+                path: 'memberId',
+                select: 'firstName lastName phoneNumber email unitId',
+                populate: {
+                    path: 'unitId',
+                    select: 'unitNumber'
+                }
+            })
+            .populate('buildingId', 'buildingName')
+            .sort({ bookingDate: -1, createdAt: -1 });
+
+        return successResponse(res, bookings, 'Bookings fetched successfully');
+    } catch (error) {
+        console.error('Get all bookings error:', error);
+        return errorResponse(res, error.message || 'Failed to fetch bookings', 500);
+    }
+};
+
+// Approve or reject booking
+export const updateBookingStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { bookingStatus, rejectionReason } = req.body;
+
+        if (!bookingStatus || !['confirmed', 'rejected', 'cancelled'].includes(bookingStatus)) {
+            return errorResponse(res, 'Invalid booking status', 400);
+        }
+
+        const booking = await AmenityBookingsModel.findOne({
+            _id: id,
+            isDeleted: false
+        });
+
+        if (!booking) {
+            return errorResponse(res, 'Booking not found', 404);
+        }
+
+        booking.bookingStatus = bookingStatus;
+        if (bookingStatus === 'rejected' && rejectionReason) {
+            booking.rejectionReason = rejectionReason;
+        }
+        if (bookingStatus === 'confirmed') {
+            booking.approvedBy = req.user?._id;
+            booking.approvedAt = new Date();
+        }
+        booking.updatedBy = req.user?._id;
+        await booking.save();
+
+        return successResponse(res, booking, `Booking ${bookingStatus} successfully`);
+    } catch (error) {
+        console.error('Update booking status error:', error);
+        return errorResponse(res, error.message || 'Failed to update booking status', 500);
+    }
+};

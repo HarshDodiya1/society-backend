@@ -4,7 +4,10 @@ import {
     getAllMembers,
     approveMember,
     rejectMember,
-    getMemberDetails
+    getMemberDetails,
+    createMember,
+    updateMember,
+    getAllUsers
 } from '../controllers/membersController.js';
 import { authenticate } from '../middlewares/auth.js';
 
@@ -12,6 +15,9 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(authenticate);
+
+// Get all users (for assigning to units)
+router.get('/users/all', getAllUsers);
 
 // Get pending members for a building
 router.get('/building/:buildingId/pending', getPendingMembers);
@@ -21,6 +27,12 @@ router.get('/building/:buildingId', getAllMembers);
 
 // Get specific member details
 router.get('/:memberId', getMemberDetails);
+
+// Create member (admin assigns unit to user)
+router.post('/', createMember);
+
+// Update member
+router.put('/:memberId', updateMember);
 
 // Approve a member
 router.post('/:memberId/approve', approveMember);

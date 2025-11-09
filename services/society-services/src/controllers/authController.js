@@ -5,6 +5,7 @@ import BuildingAdminModel from '../models/buildingadmins.js';
 import BuildingsModel from '../models/Buildings.js';
 import UsersModel from '../models/Users.js';
 import MembersModel from '../models/Members.js';
+import CommitteeMembersModel from '../models/CommitteeMembers.js';
 
 // Temporary OTP storage (in production, use Redis)
 const otpStore = new Map();
@@ -205,6 +206,7 @@ export const residentVerifyOTP = async (req, res) => {
 
         let isNewUser = false;
         let member = null;
+        let committeeMember = null;
 
         if (!user) {
             // Create new user
@@ -234,7 +236,18 @@ export const residentVerifyOTP = async (req, res) => {
             .populate('blockId')
             .populate('floorId');
 
+            // Check if user is a committee member
+            committeeMember = await CommitteeMembersModel.findOne({
+                userId: user._id,
+                isDeleted: false,
+                status: 'active'
+            })
+            .populate('buildingId', 'buildingName societyName');
+
             console.log(`✅ Existing user logged in: ${user._id}`);
+            if (committeeMember) {
+                console.log(`✅ User is a committee member: ${committeeMember.committeeType}`);
+            }
         }
 
         // Generate token
@@ -244,7 +257,8 @@ export const residentVerifyOTP = async (req, res) => {
             userType: USER_TYPES.RESIDENT,
             firstName: user.firstName,
             lastName: user.lastName,
-            email: user.email
+            email: user.email,
+            committeeType: committeeMember ? committeeMember.committeeType : null
         };
 
         const accessToken = generateToken(tokenPayload);
@@ -278,6 +292,16 @@ export const residentVerifyOTP = async (req, res) => {
                 blockId: member.blockId?._id,
                 blockName: member.blockId?.blockName,
                 memberStatus: member.memberStatus
+            } : null,
+            isCommitteeMember: !!committeeMember,
+            committeeMember: committeeMember ? {
+                _id: committeeMember._id,
+                committeeType: committeeMember.committeeType,
+                buildingId: committeeMember.buildingId?._id,
+                buildingName: committeeMember.buildingId?.buildingName,
+                startDate: committeeMember.startDate,
+                endDate: committeeMember.endDate,
+                status: committeeMember.status
             } : null
         };
 

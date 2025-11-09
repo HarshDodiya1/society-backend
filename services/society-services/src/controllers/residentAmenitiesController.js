@@ -2,6 +2,7 @@ import AmenitiesModel from '../models/Amenities.js';
 import AmenitySlotsModel from '../models/AmenitySlots.js';
 import AmenityBookingsModel from '../models/AmenityBookings.js';
 import UnitsModel from '../models/Units.js';
+import MembersModel from '../models/Members.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 // Get all active amenities
@@ -15,9 +16,10 @@ export const getResidentAmenities = async (req, res) => {
 
         const amenities = await AmenitiesModel.find({
             buildingId,
+            amenityStatus: 'available',
             status: 'active',
             isDeleted: false
-        }).select('-images');
+        });
 
         return successResponse(res, amenities, 'Amenities fetched successfully');
     } catch (error) {
@@ -229,5 +231,141 @@ export const cancelBooking = async (req, res) => {
     } catch (error) {
         console.error('Cancel booking error:', error);
         return errorResponse(res, error.message || 'Failed to cancel booking', 500);
+    }
+};
+
+// Simple booking without slots (for simple implementation)
+export const createSimpleBooking = async (req, res) => {
+    try {
+        const { amenityId, userId, bookingDate, startTime, endTime, numberOfPeople } = req.body;
+
+        if (!amenityId || !userId || !bookingDate) {
+            return errorResponse(res, 'Missing required fields: amenityId, userId, bookingDate', 400);
+        }
+
+        // Get amenity details
+        const amenity = await AmenitiesModel.findById(amenityId);
+        if (!amenity) {
+            return errorResponse(res, 'Amenity not found', 404);
+        }
+
+        // Get member details
+        const member = await MembersModel.findOne({ userId, isDeleted: false })
+            .populate('buildingId')
+            .populate('unitId');
+
+        if (!member) {
+            return errorResponse(res, 'Member not found. Please complete your profile and unit registration', 404);
+        }
+
+        // Check if booking date is valid
+        const bookingDateObj = new Date(bookingDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (bookingDateObj < today) {
+            return errorResponse(res, 'Cannot book for past dates', 400);
+        }
+
+        // Check advance booking days
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + amenity.advanceBookingDays);
+        if (bookingDateObj > maxDate) {
+            return errorResponse(res, `Cannot book more than ${amenity.advanceBookingDays} days in advance`, 400);
+        }
+
+        // Create booking
+        const booking = await AmenityBookingsModel.create({
+            amenityId,
+            memberId: member._id,
+            buildingId: member.buildingId._id,
+            bookingDate: bookingDateObj,
+            startTime: startTime || '09:00',
+            endTime: endTime || '10:00',
+            bookingAmount: amenity.bookingCharge || 0,
+            paymentStatus: amenity.bookingCharge > 0 ? 'pending' : 'completed',
+            bookingStatus: amenity.requiresApproval ? 'pending' : 'confirmed',
+            createdBy: userId
+        });
+
+        const populatedBooking = await AmenityBookingsModel.findById(booking._id)
+            .populate('amenityId', 'name description images capacity bookingCharge amenityType')
+            .populate('memberId', 'firstName lastName phoneNumber email')
+            .populate('buildingId', 'buildingName societyName');
+
+        return successResponse(res, populatedBooking, 'Booking created successfully', 201);
+    } catch (error) {
+        console.error('Create simple booking error:', error);
+        return errorResponse(res, error.message || 'Failed to create booking', 500);
+    }
+};
+
+// Get resident bookings
+export const getResidentBookings = async (req, res) => {
+    try {
+        const { userId, status } = req.query;
+
+        if (!userId) {
+            return errorResponse(res, 'User ID is required', 400);
+        }
+
+        // Get member
+        const member = await MembersModel.findOne({ userId, isDeleted: false });
+        if (!member) {
+            return errorResponse(res, 'Member not found', 404);
+        }
+
+        const query = {
+            memberId: member._id,
+            isDeleted: false
+        };
+
+        if (status) {
+            query.bookingStatus = status;
+        }
+
+        const bookings = await AmenityBookingsModel.find(query)
+            .populate('amenityId', 'name description images bookingCharge amenityType')
+            .populate('amenityBookingSlotId', 'slotDate startTime endTime')
+            .sort({ bookingDate: -1, createdAt: -1 });
+
+        return successResponse(res, bookings, 'Bookings fetched successfully');
+    } catch (error) {
+        console.error('Get resident bookings error:', error);
+        return errorResponse(res, error.message || 'Failed to fetch bookings', 500);
+    }
+};
+
+// Simulate payment completion
+export const completePayment = async (req, res) => {
+    try {
+        const { bookingId, userId, transactionId } = req.body;
+
+        if (!bookingId || !userId) {
+            return errorResponse(res, 'Booking ID and User ID are required', 400);
+        }
+
+        const booking = await AmenityBookingsModel.findById(bookingId);
+        if (!booking) {
+            return errorResponse(res, 'Booking not found', 404);
+        }
+
+        if (booking.paymentStatus === 'completed') {
+            return errorResponse(res, 'Payment already completed', 400);
+        }
+
+        booking.paymentStatus = 'completed';
+        booking.updatedBy = userId;
+        booking.updatedAt = new Date();
+        await booking.save();
+
+        const populatedBooking = await AmenityBookingsModel.findById(booking._id)
+            .populate('amenityId', 'name description images bookingCharge amenityType')
+            .populate('memberId', 'firstName lastName phoneNumber');
+
+        return successResponse(res, populatedBooking, 'Payment completed successfully');
+    } catch (error) {
+        console.error('Complete payment error:', error);
+        return errorResponse(res, error.message || 'Failed to complete payment', 500);
     }
 };

@@ -8,22 +8,48 @@ const MaintenancePaymentsSchema = new Schema({
         ref: 'maintenancebills',
         required: true
     },
+    unitId: {
+        type: Schema.Types.ObjectId,
+        ref: 'units',
+        required: true
+    },
     memberId: {
         type: Schema.Types.ObjectId,
         ref: 'members',
+        required: true
+    },
+    buildingId: {
+        type: Schema.Types.ObjectId,
+        ref: 'buildings',
         required: true
     },
     paidBy: {
         type: Schema.Types.ObjectId,
         ref: 'users'
     },
-    paidAmount: {
+    paymentAmount: {
         type: String,
         required: true
     },
-    paidDate: {
+    paidAmount: {
+        type: String
+    },
+    paymentDate: {
         type: Date,
         required: true
+    },
+    paidDate: {
+        type: Date
+    },
+    paymentMethod: {
+        type: String,
+        default: 'online'
+    },
+    transactionId: {
+        type: String
+    },
+    paymentGatewayResponse: {
+        type: Schema.Types.Mixed
     },
     paymentStatus: {
         type: String,

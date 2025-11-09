@@ -25,6 +25,10 @@ const UnitsSchema = new Schema({
         ref: 'blocks',
         required: true
     },
+    allocatedTo: {
+        type: Schema.Types.ObjectId,
+        ref: 'users'
+    },
     unitStatus: {
         type: String,
         enum: ['Vacant', 'Occupied', 'Under Maintenance'],

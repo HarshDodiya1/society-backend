@@ -22,10 +22,15 @@ const AmenityBookingsSchema = new Schema({
         type: Date,
         required: true
     },
+    startTime: {
+        type: String
+    },
+    endTime: {
+        type: String
+    },
     amenityBookingSlotId: {
         type: Schema.Types.ObjectId,
-        ref: 'amenityslots',
-        required: true
+        ref: 'amenityslots'
     },
     bookingAmount: {
         type: String,

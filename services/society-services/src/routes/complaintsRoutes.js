@@ -4,6 +4,7 @@ import {
     getComplaints,
     getComplaintById,
     updateComplaintStatus,
+    addComplaintReply,
     addComplaintFollowUp,
     updateComplaint,
     deleteComplaint,
@@ -18,6 +19,7 @@ router.get('/stats', getComplaintStats);
 router.get('/:id', getComplaintById);
 router.put('/:id', updateComplaint);
 router.put('/:id/status', updateComplaintStatus);
+router.post('/:id/reply', addComplaintReply);
 router.post('/:id/follow-up', addComplaintFollowUp);
 router.delete('/:id', deleteComplaint);
 

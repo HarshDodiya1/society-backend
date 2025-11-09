@@ -260,3 +260,141 @@ export const getMemberDetails = async (req, res) => {
         return errorResponse(res, error.message, 500);
     }
 };
+
+/**
+ * Create or Update Member (Admin assigns unit to user)
+ * Creates a pre-approved member record for committee members or users
+ */
+export const createMember = async (req, res) => {
+    try {
+        const {
+            userId, buildingId, blockId, floorId, unitId,
+            gender, memberType, ownershipProof, committeeType
+        } = req.body;
+
+        if (!userId || !buildingId || !blockId || !floorId || !unitId || !memberType) {
+            return errorResponse(res, 'Required fields missing: userId, buildingId, blockId, floorId, unitId, memberType', 400);
+        }
+
+        // Get user details
+        const user = await UsersModel.findById(userId);
+        if (!user) {
+            return errorResponse(res, 'User not found', 404);
+        }
+
+        // Check if user already has ANY unit allocated (prevent multiple unit allocation)
+        const existingMemberAnyUnit = await MembersModel.findOne({
+            userId,
+            isDeleted: false
+        });
+
+        if (existingMemberAnyUnit) {
+            return errorResponse(res, `This user already has a unit allocated: ${existingMemberAnyUnit.unitId}. A user can only be allocated to one unit.`, 400);
+        }
+
+        // Check if member already exists for this specific unit
+        const existingMember = await MembersModel.findOne({
+            userId,
+            unitId,
+            isDeleted: false
+        });
+
+        if (existingMember) {
+            return errorResponse(res, 'Member already exists for this user and unit', 400);
+        }
+
+        // Create member with pre-approved status
+        const member = await MembersModel.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            countryCodeName: user.countryCodeName,
+            countryCode: user.countryCode,
+            phoneNumber: user.phoneNumber,
+            email: user.email,
+            gender: gender || 'Other',
+            ownershipProof: ownershipProof || 'Admin Assigned',
+            committeeType: committeeType || null,
+            memberType,
+            userId,
+            buildingId,
+            blockId,
+            floorId,
+            unitId,
+            memberStatus: 'approved', // Pre-approved by admin
+            approvedBy: req.user?._id,
+            approvedAt: new Date(),
+            createdBy: req.user?._id
+        });
+
+        // Update user status
+        if (!user.isbuildingMember) {
+            user.isbuildingMember = true;
+            await user.save();
+        }
+
+        const populatedMember = await MembersModel.findById(member._id)
+            .populate('buildingId', 'buildingName societyName')
+            .populate('blockId', 'blockName')
+            .populate('floorId', 'floorName')
+            .populate('unitId', 'unitNumber')
+            .populate('userId', 'firstName lastName email phoneNumber');
+
+        return successResponse(res, populatedMember, 'Member created and approved successfully', 201);
+    } catch (error) {
+        console.error('Create Member Error:', error);
+        return errorResponse(res, error.message, 500);
+    }
+};
+
+/**
+ * Update Member details
+ */
+export const updateMember = async (req, res) => {
+    try {
+        const { memberId } = req.params;
+        const updates = req.body;
+
+        const member = await MembersModel.findById(memberId);
+        if (!member) {
+            return errorResponse(res, 'Member not found', 404);
+        }
+
+        const updatedMember = await MembersModel.findByIdAndUpdate(
+            memberId,
+            { ...updates, updatedBy: req.user?._id, updatedAt: new Date() },
+            { new: true }
+        )
+        .populate('buildingId', 'buildingName societyName')
+        .populate('blockId', 'blockName')
+        .populate('floorId', 'floorName')
+        .populate('unitId', 'unitNumber')
+        .populate('userId', 'firstName lastName email phoneNumber');
+
+        return successResponse(res, updatedMember, 'Member updated successfully');
+    } catch (error) {
+        console.error('Update Member Error:', error);
+        return errorResponse(res, error.message, 500);
+    }
+};
+
+/**
+ * Get all users (for admin to assign to units)
+ */
+export const getAllUsers = async (req, res) => {
+    try {
+        const { buildingId } = req.query;
+
+        // Get all active users
+        const users = await UsersModel.find({
+            isDeleted: false,
+            status: 'active'
+        })
+        .select('firstName lastName email phoneNumber countryCode isbuildingMember isbuildingEmployee')
+        .sort({ createdAt: -1 });
+
+        return successResponse(res, users, 'Users fetched successfully');
+    } catch (error) {
+        console.error('Get All Users Error:', error);
+        return errorResponse(res, error.message, 500);
+    }
+};

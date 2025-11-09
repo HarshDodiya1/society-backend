@@ -157,6 +157,48 @@ export const updateComplaintStatus = async (req, res) => {
     }
 };
 
+export const addComplaintReply = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { message, isAdminReply } = req.body;
+
+        if (!message) {
+            return errorResponse(res, 'Message is required', 400);
+        }
+
+        const complaint = await ComplaintsModel.findOne({ _id: id, isDeleted: false });
+        if (!complaint) {
+            return errorResponse(res, 'Complaint not found', 404);
+        }
+
+        const reply = {
+            message,
+            isAdminReply: isAdminReply || false,
+            createdBy: req.user?._id,
+            createdAt: new Date()
+        };
+
+        const updatedComplaint = await ComplaintsModel.findByIdAndUpdate(
+            id,
+            {
+                $push: { replies: reply },
+                updatedBy: req.user?._id,
+                updatedAt: new Date()
+            },
+            { new: true }
+        )
+        .populate('replies.createdBy', 'firstName lastName')
+        .populate('buildingId', 'buildingName')
+        .populate('unitId', 'unitNumber')
+        .populate('memberId', 'firstName lastName');
+
+        return successResponse(res, updatedComplaint, 'Reply added successfully');
+    } catch (error) {
+        console.error('Add complaint reply error:', error);
+        return errorResponse(res, error.message || 'Failed to add reply', 500);
+    }
+};
+
 export const addComplaintFollowUp = async (req, res) => {
     try {
         const { id } = req.params;

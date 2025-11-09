@@ -3,11 +3,6 @@ const Schema = mongoose.Schema
 import { DBConnect } from './index.js';
 
 const MaintenanceBillsSchema = new Schema({
-    maintenanceTypeId: {
-        type: Schema.Types.ObjectId,
-        ref: 'maintenancetypes',
-        required: true
-    },
     unitId: {
         type: Schema.Types.ObjectId,
         ref: 'units',
@@ -18,10 +13,6 @@ const MaintenanceBillsSchema = new Schema({
         ref: 'buildings',
         required: true
     },
-    dueDate: {
-        type: Date,
-        required: true
-    },
     month: {
         type: Number,
         required: true
@@ -30,42 +21,26 @@ const MaintenanceBillsSchema = new Schema({
         type: Number,
         required: true
     },
-    totalOwnerAmount: {
-        type: String,
+    amount: {
+        type: Number,
         required: true
     },
-    totalTenantAmount: {
-        type: String,
+    dueDate: {
+        type: Date,
         required: true
     },
-    lateFeeEnabled: {
+    isPaid: {
         type: Boolean,
         default: false
     },
-    lateFeeType: {
+    paidDate: {
+        type: Date
+    },
+    paymentMethod: {
         type: String
     },
-    lateFeeAmount: {
+    transactionId: {
         type: String
-    },
-    description: {
-        type: String
-    },
-    published: {
-        type: Boolean,
-        default: false
-    },
-    billStatus: {
-        type: String,
-        default: 'draft'
-    },
-    createdBy: {
-        type: Schema.Types.ObjectId,
-        ref: 'users'
-    },
-    updatedBy: {
-        type: Schema.Types.ObjectId,
-        ref: 'users'
     },
     createdAt: {
         type: Date,
@@ -74,13 +49,6 @@ const MaintenanceBillsSchema = new Schema({
     updatedAt: {
         type: Date,
         default: Date.now
-    },
-    deletedAt: {
-        type: Date
-    },
-    isDeleted: {
-        type: Boolean,
-        default: false
     }
 });
 
