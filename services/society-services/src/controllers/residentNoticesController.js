@@ -5,38 +5,52 @@ import { successResponse, errorResponse } from '../utils/response.js';
 // Get all published notices for resident
 export const getResidentNotices = async (req, res) => {
     try {
-        const { unitId } = req.query;
+        const { unitId, buildingId } = req.query;
 
-        if (!unitId) {
-            return errorResponse(res, 'Unit ID is required', 400);
+        let targetBuildingId = buildingId;
+        let targetBlockId = null;
+
+        // If unitId is provided, get building and block from unit
+        if (unitId) {
+            const unit = await UnitsModel.findById(unitId)
+                .populate({
+                    path: 'floorId',
+                    populate: { path: 'blockId' }
+                });
+
+            if (!unit) {
+                return errorResponse(res, 'Unit not found', 404);
+            }
+
+            targetBuildingId = unit.floorId?.blockId?.buildingId;
+            targetBlockId = unit.floorId?.blockId?._id;
         }
 
-        // Get unit to find building and block
-        const unit = await UnitsModel.findById(unitId)
-            .populate({
-                path: 'floorId',
-                populate: { path: 'blockId' }
-            });
-
-        if (!unit) {
-            return errorResponse(res, 'Unit not found', 404);
+        // If neither unitId nor buildingId is provided, return error
+        if (!targetBuildingId) {
+            return errorResponse(res, 'Either unitId or buildingId is required', 400);
         }
 
-        const buildingId = unit.floorId?.blockId?.buildingId;
-        const blockId = unit.floorId?.blockId?._id;
-
-        // Get notices - either for all blocks or specific block
-        const notices = await NoticesModel.find({
-            buildingId,
+        // Build query - fetch notices for the building
+        const query = {
+            buildingId: targetBuildingId,
             noticeStatus: 'published',
-            isDeleted: false,
-            $or: [
-                { blockIds: { $size: 0 } }, // All blocks
-                { blockIds: blockId } // Specific block
-            ]
-        })
-            .sort({ createdAt: -1 })
+            isDeleted: false
+        };
+
+        // If we have a specific block, filter by block (or notices with no block restrictions)
+        if (targetBlockId) {
+            query.$or = [
+                { blockIds: { $size: 0 } }, // Notices for all blocks
+                { blockIds: targetBlockId } // Notices for specific block
+            ];
+        }
+
+        const notices = await NoticesModel.find(query)
+            .sort({ publishDate: -1 })
             .populate('createdBy', 'firstName lastName');
+
+        console.log(`✅ Found ${notices.length} notices for building ${targetBuildingId}`);
 
         return successResponse(res, notices, 'Notices fetched successfully');
     } catch (error) {

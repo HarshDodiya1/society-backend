@@ -14,8 +14,12 @@ import visitorsRoutes from './visitorsRoutes.js';
 import maintenanceRoutes from './maintenanceRoutes.js';
 import residentRoutes from './residentRoutes.js';
 import membersRoutes from './membersRoutes.js';
+import devRoutes from './devRoutes.js';
 
 const router = express.Router();
+
+// Development Routes (Only in development mode)
+router.use('/dev', devRoutes);
 
 // Admin Routes
 router.use('/auth', authRoutes);

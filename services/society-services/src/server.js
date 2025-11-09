@@ -23,10 +23,15 @@ const whitelist = [
 ];
 
 const corsOption = (req, callback) => {
-  // Allow all in development
-  if (process.env.NODE_ENV === 'dev') {
+  // Allow all in development (including 'dev' and 'development')
+  const isDev = process.env.NODE_ENV === 'dev' || 
+                process.env.NODE_ENV === 'development' || 
+                !process.env.NODE_ENV;
+  
+  if (isDev) {
+    console.log('🔓 CORS: Allowing all origins (development mode)');
     return callback(null, {
-      origin: true,
+      origin: true, // Allow any origin in development
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
@@ -37,6 +42,7 @@ const corsOption = (req, callback) => {
   const allowed = whitelist.indexOf(hostHeader) !== -1;
 
   if (allowed) {
+    console.log('✅ CORS: Request allowed from', hostHeader);
     callback(null, {
       origin: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -46,7 +52,7 @@ const corsOption = (req, callback) => {
   } else {
     // Deny CORS - callers will receive an error
     const err = new Error(`Not allowed by CORS : ${hostHeader}`);
-    console.warn('CORS blocked request from', hostHeader);
+    console.warn('❌ CORS blocked request from', hostHeader);
     callback(err, { origin: false });
   }
 };
@@ -56,17 +62,24 @@ app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware with more details
+// Simple request logging middleware (without headers)
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  console.log('Headers:', JSON.stringify(req.headers));
-  console.log('Query:', JSON.stringify(req.query));
+  const timestamp = new Date().toISOString();
+  console.log(`${timestamp} - ${req.method} ${req.url}`);
+  
+  // Only log body for POST/PUT/PATCH requests (excluding sensitive data)
+  if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+    const logBody = { ...req.body };
+    // Remove sensitive fields from logs
+    delete logBody.password;
+    delete logBody.token;
+    console.log('Body:', JSON.stringify(logBody).substring(0, 200));
+  }
 
-  // Log response
+  // Log response status
   const oldSend = res.send;
   res.send = function(data) {
-    console.log(`${new Date().toISOString()} - Response Status: ${res.statusCode}`);
-    console.log('Response Data:', typeof data === 'string' ? data.substring(0, 200) : JSON.stringify(data).substring(0, 200));
+    console.log(`${timestamp} - Response: ${res.statusCode}`);
     oldSend.apply(res, arguments);
   };
 
@@ -100,4 +113,22 @@ app.use((err, req, res, next) => {
 
 // Server listen
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log('');
+  console.log('╔═══════════════════════════════════════════╗');
+  console.log('║       Society Services API Server         ║');
+  console.log('╚═══════════════════════════════════════════╝');
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📱 Android Emulator: http://10.0.2.2:${PORT}/api`);
+  console.log(`💻 Local: http://localhost:${PORT}/api`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('');
+  
+  // Database connection is already established via import
+  // DBConnect is a connection object, not a function
+  if (DBConnect && DBConnect.readyState === 1) {
+    console.log('✅ Database connected successfully');
+  } else {
+    console.log('⏳ Database connecting...');
+  }
+});
