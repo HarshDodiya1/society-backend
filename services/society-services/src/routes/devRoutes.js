@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { cleanDatabase, getDatabaseStats, seedNotices } from '../controllers/devController.js';
+import { cleanDatabase, getDatabaseStats, seedNotices, getSampleMemberData } from '../controllers/devController.js';
 import { authenticate, isSuperAdmin } from '../middlewares/auth.js';
 
 const router = express.Router();
@@ -25,6 +25,9 @@ router.use(isDevelopmentMode);
 
 // Get database statistics (public in dev mode)
 router.get('/db-stats', getDatabaseStats);
+
+// Get sample member data for testing
+router.get('/sample-member', getSampleMemberData);
 
 // Seed sample notices (public in dev mode for easy testing)
 router.post('/seed-notices', seedNotices);

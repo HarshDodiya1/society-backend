@@ -270,7 +270,7 @@ export const seedNotices = async (req, res) => {
 
         // Get all buildings
         const buildings = await Buildings.find({ isDeleted: false });
-        
+
         if (buildings.length === 0) {
             return errorResponse(res, 'No buildings found. Please create a building first.', 404);
         }
@@ -280,7 +280,7 @@ export const seedNotices = async (req, res) => {
         for (const building of buildings) {
             // Get admin user for this building (or use first user)
             const adminUser = await Users.findOne({ role: 'admin' }).limit(1);
-            
+
             // Sample notices
             const sampleNotices = [
                 {
@@ -348,7 +348,7 @@ export const seedNotices = async (req, res) => {
             // Create notices
             const notices = await Notices.insertMany(sampleNotices);
             createdNotices.push(...notices);
-            
+
             console.log(`✓ Created ${notices.length} notices for ${building.buildingName}`);
         }
 
@@ -363,6 +363,56 @@ export const seedNotices = async (req, res) => {
 
     } catch (error) {
         console.error('❌ Seed Notices Error:', error);
+        return errorResponse(res, error.message, 500);
+    }
+};
+
+/**
+ * Get Sample Member Data
+ * Returns member data with unitId for testing
+ */
+export const getSampleMemberData = async (req, res) => {
+    try {
+        // Get a member with unit populated
+        const member = await Members.findOne({ memberStatus: 'approved' })
+            .populate({
+                path: 'unitId',
+                populate: {
+                    path: 'floorId',
+                    populate: {
+                        path: 'blockId',
+                        populate: 'buildingId'
+                    }
+                }
+            })
+            .limit(1);
+
+        if (!member) {
+            return errorResponse(res, 'No approved members found', 404);
+        }
+
+        const testData = {
+            memberId: member._id,
+            userId: member.userId,
+            unitId: member.unitId?._id,
+            buildingId: member.unitId?.floorId?.blockId?.buildingId?._id || member.buildingId,
+            blockId: member.unitId?.floorId?.blockId?._id,
+            floorId: member.unitId?.floorId?._id,
+            memberStatus: member.memberStatus,
+            unit: {
+                unitNumber: member.unitId?.unitNumber,
+                floor: member.unitId?.floorId?.floorNumber,
+                block: member.unitId?.floorId?.blockId?.blockName,
+                building: member.unitId?.floorId?.blockId?.buildingId?.buildingName,
+            }
+        };
+
+        console.log('📋 Sample member data:', testData);
+
+        return successResponse(res, testData, 'Sample member data fetched successfully');
+
+    } catch (error) {
+        console.error('Get Sample Member Data Error:', error);
         return errorResponse(res, error.message, 500);
     }
 };
