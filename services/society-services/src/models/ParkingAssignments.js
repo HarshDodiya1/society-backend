@@ -64,6 +64,11 @@ ParkingAssignmentsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+ParkingAssignmentsSchema.index({ buildingId: 1 });
+ParkingAssignmentsSchema.index({ isDeleted: 1, assignmentStatus: 1 });
+ParkingAssignmentsSchema.index({ createdAt: -1 });
+
 const ParkingAssignmentsModel = DBConnect.model('parkingassignments', ParkingAssignmentsSchema);
 
 ParkingAssignmentsModel.syncIndexes().then(() => {

@@ -101,6 +101,11 @@ VisitorsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+VisitorsSchema.index({ buildingId: 1 });
+VisitorsSchema.index({ isDeleted: 1, status: 1 });
+VisitorsSchema.index({ createdAt: -1 });
+
 const VisitorsModel = DBConnect.model('visitors', VisitorsSchema);
 
 VisitorsModel.syncIndexes().then(() => {

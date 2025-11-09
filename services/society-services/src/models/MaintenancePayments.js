@@ -62,7 +62,12 @@ MaintenancePaymentsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const MaintenancePaymentsModel = DBConnect.model('maintenancepayments', MaintenancePaymentsSchema)
+// Indexes
+MaintenancePaymentsSchema.index({ buildingId: 1 });
+MaintenancePaymentsSchema.index({ isDeleted: 1, paymentStatus: 1 });
+MaintenancePaymentsSchema.index({ createdAt: -1 });
+
+const MaintenancePaymentsModel = DBConnect.model('maintenancepayments', MaintenancePaymentsSchema);
 
 MaintenancePaymentsModel.syncIndexes().then(() => {
     console.log('MaintenancePayments Model Indexes Synced')
@@ -70,4 +75,4 @@ MaintenancePaymentsModel.syncIndexes().then(() => {
     console.log('MaintenancePayments Model Indexes Sync Error', err)
 });
 
-export default MaintenancePaymentsModel
+export default MaintenancePaymentsModel;

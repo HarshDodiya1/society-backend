@@ -56,7 +56,12 @@ VehiclesSchema.methods.toJSON = function () {
     return obj;
 };
 
-const VehiclesModel = DBConnect.model('vehicles', VehiclesSchema)
+// Indexes
+VehiclesSchema.index({ isDeleted: 1, status: 1 });
+VehiclesSchema.index({ createdAt: -1 });
+VehiclesSchema.index({ vehicleNo: 1 }, { unique: false, sparse: true });
+
+const VehiclesModel = DBConnect.model('vehicles', VehiclesSchema);
 
 VehiclesModel.syncIndexes().then(() => {
     console.log('Vehicles Model Indexes Synced')
@@ -64,4 +69,4 @@ VehiclesModel.syncIndexes().then(() => {
     console.log('Vehicles Model Indexes Sync Error', err)
 });
 
-export default VehiclesModel
+export default VehiclesModel;

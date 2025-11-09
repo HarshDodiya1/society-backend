@@ -76,7 +76,12 @@ AmenityBookingsSchema.methods.toJSON = function () {
     return obj;
 };
 
-const AmenityBookingsModel = DBConnect.model('amenitybookings', AmenityBookingsSchema)
+// Indexes
+AmenityBookingsSchema.index({ buildingId: 1 });
+AmenityBookingsSchema.index({ isDeleted: 1, bookingStatus: 1 });
+AmenityBookingsSchema.index({ createdAt: -1 });
+
+const AmenityBookingsModel = DBConnect.model('amenitybookings', AmenityBookingsSchema);
 
 AmenityBookingsModel.syncIndexes().then(() => {
     console.log('AmenityBookings Model Indexes Synced')
@@ -84,4 +89,4 @@ AmenityBookingsModel.syncIndexes().then(() => {
     console.log('AmenityBookings Model Indexes Sync Error', err)
 });
 
-export default AmenityBookingsModel
+export default AmenityBookingsModel;

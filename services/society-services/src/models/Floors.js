@@ -46,6 +46,11 @@ FloorsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+FloorsSchema.index({ buildingId: 1 });
+FloorsSchema.index({ isDeleted: 1, status: 1 });
+FloorsSchema.index({ createdAt: -1 });
+
 const FloorsModel = DBConnect.model('floors', FloorsSchema);
 
 FloorsModel.syncIndexes().then(() => {

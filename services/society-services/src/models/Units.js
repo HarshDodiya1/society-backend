@@ -64,6 +64,12 @@ UnitsSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+UnitsSchema.index({ blockId: 1 });
+UnitsSchema.index({ unitNumber: 1, blockId: 1 }, { unique: true, sparse: true });
+UnitsSchema.index({ isDeleted: 1, status: 1 });
+UnitsSchema.index({ createdAt: -1 });
+
 const UnitsModel = DBConnect.model('units', UnitsSchema);
 
 UnitsModel.syncIndexes().then(() => {

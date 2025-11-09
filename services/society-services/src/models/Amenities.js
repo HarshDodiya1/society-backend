@@ -90,6 +90,12 @@ AmenitiesSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+AmenitiesSchema.index({ buildingId: 1 });
+AmenitiesSchema.index({ name: 1, buildingId: 1 }, { unique: true, sparse: true });
+AmenitiesSchema.index({ isDeleted: 1, status: 1 });
+AmenitiesSchema.index({ createdAt: -1 });
+
 const AmenitiesModel = DBConnect.model('amenities', AmenitiesSchema);
 
 AmenitiesModel.syncIndexes().then(() => {

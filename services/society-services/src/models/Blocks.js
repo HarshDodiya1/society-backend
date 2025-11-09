@@ -46,6 +46,12 @@ BlocksSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+BlocksSchema.index({ buildingId: 1 });
+BlocksSchema.index({ blockName: 1, buildingId: 1 }, { unique: true, sparse: true });
+BlocksSchema.index({ isDeleted: 1, status: 1 });
+BlocksSchema.index({ createdAt: -1 });
+
 const BlocksModel = DBConnect.model('blocks', BlocksSchema);
 
 BlocksModel.syncIndexes().then(() => {

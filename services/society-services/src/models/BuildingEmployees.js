@@ -130,6 +130,11 @@ BuildingEmployeesSchema.methods.toJSON = function () {
     return obj;
 };
 
+// Indexes
+BuildingEmployeesSchema.index({ buildingId: 1 });
+BuildingEmployeesSchema.index({ isDeleted: 1, status: 1 });
+BuildingEmployeesSchema.index({ createdAt: -1 });
+
 const BuildingEmployeesModel = DBConnect.model('buildingemployees', BuildingEmployeesSchema);
 
 BuildingEmployeesModel.syncIndexes().then(() => {
