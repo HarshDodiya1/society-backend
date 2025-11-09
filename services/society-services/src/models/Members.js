@@ -85,6 +85,16 @@ const MembersSchema = new Schema({
     approvedAt: {
         type: Date
     },
+    rejectedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'users'
+    },
+    rejectedAt: {
+        type: Date
+    },
+    rejectionReason: {
+        type: String
+    },
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: 'users'

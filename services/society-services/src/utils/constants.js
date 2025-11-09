@@ -1,6 +1,7 @@
 export const USER_TYPES = {
     SUPER_ADMIN: 'superadmin',
     BUILDING_ADMIN: 'buildingadmin',
+    RESIDENT: 'resident',
     MEMBER: 'member',
     EMPLOYEE: 'employee'
 };

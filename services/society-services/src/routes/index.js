@@ -13,6 +13,7 @@ import eventsRoutes from './eventsRoutes.js';
 import visitorsRoutes from './visitorsRoutes.js';
 import maintenanceRoutes from './maintenanceRoutes.js';
 import residentRoutes from './residentRoutes.js';
+import membersRoutes from './membersRoutes.js';
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.use('/parking', parkingRoutes);
 router.use('/events', eventsRoutes);
 router.use('/visitors', visitorsRoutes);
 router.use('/maintenance', maintenanceRoutes);
+router.use('/members', membersRoutes);
 
 // Resident Routes (Mobile App)
 router.use('/resident', residentRoutes);
